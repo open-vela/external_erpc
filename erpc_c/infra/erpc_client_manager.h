@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2020 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -12,9 +11,11 @@
 #define _EMBEDDED_RPC__CLIENT_MANAGER_H_
 
 #ifdef __cplusplus
-#include "erpc_client_server_common.h"
 #include "erpc_codec.h"
 #include "erpc_config_internal.h"
+#if ERPC_MESSAGE_LOGGING
+#include "erpc_message_loggers.h"
+#endif
 #if ERPC_NESTED_CALLS
 #include "erpc_server.h"
 #include "erpc_threading.h"
@@ -50,7 +51,11 @@ class Server;
  *
  * @ingroup infra_client
  */
-class ClientManager : public ClientServerCommon
+#if ERPC_MESSAGE_LOGGING
+class ClientManager : public MessageLoggers
+#else
+class ClientManager
+#endif
 {
 public:
     /*!
@@ -59,8 +64,7 @@ public:
      * This function initializes object attributes.
      */
     ClientManager(void)
-    : ClientServerCommon()
-    , m_messageFactory(NULL)
+    : m_messageFactory(NULL)
     , m_codecFactory(NULL)
     , m_transport(NULL)
     , m_sequence(0)
@@ -68,6 +72,9 @@ public:
 #if ERPC_NESTED_CALLS
     , m_server(NULL)
     , m_serverThreadId(NULL)
+#endif
+#if ERPC_MESSAGE_LOGGING
+    , MessageLoggers()
 #endif
     {
     }
@@ -221,10 +228,10 @@ public:
      * @param[in] codec Set in inout codec.
      * @param[in] isOneway Set information if codec is only oneway or bidirectional.
      */
-    RequestContext(uint32_t sequence, Codec *codec, bool argIsOneway)
+    RequestContext(uint32_t sequence, Codec *codec, bool isOneway)
     : m_sequence(sequence)
     , m_codec(codec)
-    , m_oneway(argIsOneway)
+    , m_oneway(isOneway)
     {
     }
 

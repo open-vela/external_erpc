@@ -629,7 +629,7 @@ data_map CGenerator::getEnumTemplateData(EnumType *enumType)
 
 data_list CGenerator::getEnumMembersTemplateData(EnumType *enumType)
 {
-    unsigned int j = 0;
+    int j = 0;
     data_list enumMembersList;
     for (auto member : enumType->getMembers())
     {
@@ -720,12 +720,12 @@ void CGenerator::makeAliasesTemplateData()
             else
             {
                 /* skip structure, unions and functions type definitions */
-                for (unsigned int aliasTypesIt = i; aliasTypesIt < aliasTypeVector.size(); ++aliasTypesIt)
+                for (int aliasTypesIt = i; aliasTypesIt < aliasTypeVector.size(); ++aliasTypesIt)
                 {
                     if (callbackParamType == aliasTypeVector[aliasTypesIt])
                     {
                         // Add aliases in IDL declaration order.
-                        unsigned int nextIt = aliasTypesIt + 1;
+                        int nextIt = aliasTypesIt + 1;
                         while (nextIt < aliasTypeVector.size())
                         {
                             AliasType *nextAlias = dynamic_cast<AliasType *>(aliasTypeVector[nextIt]);
@@ -1267,7 +1267,6 @@ data_map CGenerator::getUnionDeclarationTemplateData(UnionType *unionType)
 data_map CGenerator::getUnionDefinitionTemplateData(Group *group, UnionType *unionType, data_map &unionInfo,
                                                     bool &needUnionsServerFree)
 {
-    (void)group;
     bool needTempVariable = false;
     unionInfo["coderCall"] =
         getEncodeDecodeCall("data->", nullptr, unionType, nullptr, true, nullptr, needTempVariable, false);
@@ -1574,9 +1573,9 @@ data_map CGenerator::getFunctionBaseTemplateData(Group *group, FunctionBase *fn)
                 Symbol *symbol = fn->getParameters().getScope().getSymbol(maxLengthName, false);
                 if (symbol)
                 {
-                    StructMember *symbolStructMember = dynamic_cast<StructMember *>(symbol);
-                    assert(symbolStructMember);
-                    if (symbolStructMember->getDirection() != kInDirection)
+                    StructMember *structMember = dynamic_cast<StructMember *>(symbol);
+                    assert(structMember);
+                    if (structMember->getDirection() != kInDirection)
                     {
                         throw semantic_error(
                             format_string("line %d, ref %d: The parameter named by a max_length annotation must be "
@@ -1843,7 +1842,6 @@ void CGenerator::setSymbolDataToSide(const Symbol *symbolType, const set<_param_
 
 data_map CGenerator::getTypeInfo(DataType *t, bool isFunction)
 {
-    (void)isFunction;
     data_map info;
     info["isNotVoid"] = make_data(t->getDataType() != DataType::kVoidType);
     return info;
@@ -1865,7 +1863,7 @@ string CGenerator::getErrorReturnValue(FunctionBase *fn)
         }
         else if (dataType->isString())
         {
-            return (dataType->isUString() ? "(unsigned char *)" : "(char*)") + returnVal->toString();
+            return "(char *) " + returnVal->toString();
         }
         else if (dataType->isScalar())
         {
@@ -1939,7 +1937,7 @@ string CGenerator::getFunctionServerCall(Function *fn, FunctionType *functionTyp
 
     if (params.size())
     {
-        unsigned int n = 0;
+        int n = 0;
         for (auto it : params)
         {
             bool isLast = (n == params.size() - 1);
@@ -2015,7 +2013,7 @@ string CGenerator::getFunctionPrototype(Group *group, FunctionBase *fn, std::str
 
     if (params.size())
     {
-        unsigned int n = 0;
+        int n = 0;
         for (auto it : params)
         {
             bool isLast = (n == params.size() - 1);
@@ -2129,7 +2127,7 @@ string CGenerator::generateIncludeGuardName(const string &filename)
     size_t found = filename.find_last_of("/\\");
     if (found != string::npos)
     {
-        fileNoPath = filename.substr(found + 1);
+        string fileNoPath = filename.substr(found + 1);
     }
     // Create include guard macro name.
     guard = "_";
@@ -2245,8 +2243,6 @@ string CGenerator::getBuiltinTypename(const BuiltinType *t)
             return "double";
         case BuiltinType::kStringType:
             return "char *";
-        case BuiltinType::kUStringType:
-            return "unsigned char*";            
         case BuiltinType::kBinaryType:
             return "uint8_t *";
         default:
@@ -2298,7 +2294,6 @@ void CGenerator::getEncodeDecodeBuiltin(Group *group, BuiltinType *t, data_map &
         templateData["freeingCall"] = m_templateData["freeData"];
         // needDealloc(templateData, t, structType, nullptr);
         templateData["builtinType"] = "kStringType";
-        templateData["builtinTypeName"] = t->isUString() ? "unsigned char*" : "char*";
     }
     else
     {
@@ -3063,7 +3058,7 @@ data_map CGenerator::allocateCall(const string &name, Symbol *symbol)
     else
     {
         typeValue = "char";
-        typePointerValue = dataType->isUString() ? "unsigned char*" : "char *";
+        typePointerValue = "char *";
     }
 
     alloc["name"] = name.c_str();
