@@ -175,7 +175,7 @@ protected:
      *
      * @param[in] structMember Structure member, Function parameter or Union member.
      */
-    virtual void setBinaryList(StructMember *structMember) { (void)structMember; };
+    virtual void setBinaryList(StructMember *structMember){};
 
     /*!
      * @brief This function sets group symbols template data.
