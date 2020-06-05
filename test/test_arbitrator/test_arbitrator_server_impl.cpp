@@ -17,7 +17,6 @@
 #define number 15
 int i = 0;
 int numbers[number];
-FirstInterface_service *svc;
 
 void firstSendInt(int32_t a)
 {
@@ -44,27 +43,12 @@ int32_t callSecondSide()
 void add_services(erpc::SimpleServer *server)
 {
     /* Define services to add using dynamic memory allocation
-     * Exapmle:ArithmeticService_service * svc = new ArithmeticService_service();
-     */
-    svc = new FirstInterface_service();
+    * Exapmle:ArithmeticService_service * svc = new ArithmeticService_service();
+    */ // NOTE: possible memory leak? not ever deleting
+    FirstInterface_service *svc = new FirstInterface_service();
 
     /* Add services
      * Example: server->addService(svc);
      */
     server->addService(svc);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Remove service from server code
-////////////////////////////////////////////////////////////////////////////////
-
-void remove_services(erpc::SimpleServer *server)
-{
-    /* Remove services
-     * Example: server->removeService (svc);
-     */
-    server->removeService(svc);
-    /* Delete unused service
-     */
-    delete svc;
 }

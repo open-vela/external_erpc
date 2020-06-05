@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016 - 2020 NXP
+ * Copyright 2016 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -29,12 +29,7 @@ extern "C" {
 #include "board.h"
 #include "fsl_debug_console.h"
 #include "mcmgr.h"
-#if defined(RPMSG)
 #include "rpmsg_lite.h"
-#endif
-#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
-int main(int argc, char **argv);
-#endif
 #ifdef __cplusplus
 }
 #endif
@@ -54,7 +49,6 @@ TaskHandle_t g_clientTask;
 volatile int waitQuit = 0;
 volatile uint16_t eRPCReadyEventData = 0;
 extern const uint32_t erpc_generated_crc;
-erpc_service_t service = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -137,21 +131,12 @@ void runInit(void *arg)
     MCMGR_RegisterEvent(kMCMGR_RemoteApplicationEvent, eRPCReadyEventHandler, NULL);
 
     // Boot source for Core 1
-#if defined(RPMSG)
-    MCMGR_StartCore(kMCMGR_Core1, (void *)(char *)CORE1_BOOT_ADDRESS, (uint32_t)rpmsg_lite_base,
-                    kMCMGR_Start_Synchronous);
-#elif defined(MU)
-    MCMGR_StartCore(kMCMGR_Core1, (void *)(char *)CORE1_BOOT_ADDRESS, (uint32_t)0, kMCMGR_Start_Asynchronous);
-#endif
+    MCMGR_StartCore(kMCMGR_Core1, CORE1_BOOT_ADDRESS, (uint32_t)rpmsg_lite_base, kMCMGR_Start_Synchronous);
 
+    // RPMsg-Lite transport layer initialization
     erpc_transport_t transportClient;
     erpc_transport_t transportServer;
-#if defined(RPMSG)
-    // RPMsg-Lite transport layer initialization
     transportClient = erpc_transport_rpmsg_lite_rtos_master_init(100, 101, ERPC_TRANSPORT_RPMSG_LITE_LINK_ID);
-#elif defined(MU)
-    transportClient = erpc_transport_mu_init(MU_BASE);
-#endif
     if (transportClient == NULL)
     {
         // error in initialization of transport layer
@@ -169,11 +154,7 @@ void runInit(void *arg)
 
     // MessageBufferFactory initialization
     erpc_mbf_t message_buffer_factory;
-#if defined(RPMSG)
     message_buffer_factory = erpc_mbf_rpmsg_init(transportClient);
-#elif defined(MU)
-    message_buffer_factory = erpc_mbf_dynamic_init();
-#endif
 
     // eRPC client side initialization
     transportServer = erpc_arbitrated_client_init(transportClient, message_buffer_factory);
@@ -188,8 +169,7 @@ void runInit(void *arg)
     erpc_arbitrated_client_set_server_thread_id((void *)g_serverTask);
 
     // adding the service to the server
-    service = create_SecondInterface_service();
-    erpc_add_service_to_server(service);
+    erpc_add_service_to_server(create_SecondInterface_service());
 
     // unblock server and client task
     xTaskNotifyGive(g_serverTask);
@@ -208,12 +188,6 @@ void runInit(void *arg)
     vTaskSuspend(NULL);
 }
 
-/************************************************************************************
- * Following snippet reused from https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
- * Copyright 2008, Google Inc.
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 class MinimalistPrinter : public ::testing::EmptyTestEventListener
 {
     // Called before a test starts.
@@ -225,8 +199,8 @@ class MinimalistPrinter : public ::testing::EmptyTestEventListener
     // Called after a failed assertion or a SUCCEED() invocation.
     virtual void OnTestPartResult(const ::testing::TestPartResult &test_part_result)
     {
-        PRINTF("%s in %s:%d\r\n%s\r\n", test_part_result.failed() ? "*** Failure" : "Success",
-               test_part_result.file_name(), test_part_result.line_number(), test_part_result.summary());
+        PRINTF("%s in %s:%d\r\n%s\r\n", test_part_result.failed() ? "*** Failure" : "Success", test_part_result.file_name(),
+               test_part_result.line_number(), test_part_result.summary());
     }
 
     // Called after a test ends.
@@ -241,10 +215,10 @@ class MinimalistPrinter : public ::testing::EmptyTestEventListener
                test_case.failed_test_count());
     }
 };
-/*
- * end of reused snippet
- ***********************************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
@@ -261,10 +235,10 @@ int main(int argc, char **argv)
     // Calculate size of the image
     uint32_t core1_image_size;
     core1_image_size = get_core1_image_size();
-    PRINTF("Copy CORE1 image to address: 0x%x, size: %d\r\n", (void *)(char *)CORE1_BOOT_ADDRESS, core1_image_size);
+    PRINTF("Copy CORE1 image to address: 0x%x, size: %d\r\n", CORE1_BOOT_ADDRESS, core1_image_size);
 
     // Copy application from FLASH to RAM
-    memcpy((void *)(char *)CORE1_BOOT_ADDRESS, (void *)CORE1_IMAGE_START, core1_image_size);
+    memcpy(CORE1_BOOT_ADDRESS, (void *)CORE1_IMAGE_START, core1_image_size);
 #endif
 
     g_waitQuitMutex = xSemaphoreCreateMutex();
@@ -278,13 +252,12 @@ int main(int argc, char **argv)
     {
     }
 }
+#ifdef __cplusplus
+}
+#endif
 
 void quitSecondInterfaceServer()
 {
-    /* removing the service from the server */
-    erpc_remove_service_from_server(service);
-    destroy_SecondInterface_service();
-
     // Stop server part
     erpc_server_stop();
     increaseWaitQuit();
