@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2019 NXP
  * All rights reserved.
  *
  *
@@ -26,8 +26,6 @@
 #define ERPC_THREADS_PTHREADS (1) //!< POSIX pthreads.
 #define ERPC_THREADS_FREERTOS (2) //!< FreeRTOS.
 #define ERPC_THREADS_ZEPHYR (3)   //!< ZEPHYR.
-#define ERPC_THREADS_MBED (4)     //!< Mbed OS
-#define ERPC_THREADS_WIN32 (5)    //!< WIN32
 
 #define ERPC_NOEXCEPT_DISABLED (0) //!< Disabling noexcept feature.
 #define ERPC_NOEXCEPT_ENABLED (1)  //!<  Enabling noexcept feature.
@@ -96,9 +94,8 @@
 
 //! @def ERPC_MESSAGE_LOGGING
 //!
-//! Enable eRPC message logging code through the eRPC. Take look into "erpc_message_loggers.h". Can be used for base
-//! printing messages, or sending data to another system for data analysis. Default set to
-//! ERPC_MESSAGE_LOGGING_DISABLED.
+//! Enable eRPC message logging code through the eRPC. Take look into "erpc_message_loggers.h". Can be used for base printing
+//! messages, or sending data to another system for data analysis. Default set to ERPC_MESSAGE_LOGGING_DISABLED.
 //!
 //! Uncomment for using logging feature.
 //#define ERPC_MESSAGE_LOGGING (ERPC_MESSAGE_LOGGING_ENABLED)
