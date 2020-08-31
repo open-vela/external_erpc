@@ -14,7 +14,7 @@ Setup
 
 Python 2.7.x is required. It will also work with Python 3.5+.
 
-py.test and pyYAML are required to run the tests. These can be installed via pip.
+py.test(**Version 5.0.0-**) and pyYAML are required to run the tests. These can be installed via pip.
 
     pip install pytest pyyaml
 
