@@ -1863,7 +1863,7 @@ string CGenerator::getErrorReturnValue(FunctionBase *fn)
         }
         else if (dataType->isString())
         {
-            return (dataType->isUString() ? "(unsigned char *)" : "(char*)") + returnVal->toString();
+            return "(char *) " + returnVal->toString();
         }
         else if (dataType->isScalar())
         {
@@ -2243,8 +2243,6 @@ string CGenerator::getBuiltinTypename(const BuiltinType *t)
             return "double";
         case BuiltinType::kStringType:
             return "char *";
-        case BuiltinType::kUStringType:
-            return "unsigned char*";            
         case BuiltinType::kBinaryType:
             return "uint8_t *";
         default:
@@ -2296,7 +2294,6 @@ void CGenerator::getEncodeDecodeBuiltin(Group *group, BuiltinType *t, data_map &
         templateData["freeingCall"] = m_templateData["freeData"];
         // needDealloc(templateData, t, structType, nullptr);
         templateData["builtinType"] = "kStringType";
-        templateData["builtinTypeName"] = t->isUString() ? "unsigned char*" : "char*";
     }
     else
     {
@@ -3061,7 +3058,7 @@ data_map CGenerator::allocateCall(const string &name, Symbol *symbol)
     else
     {
         typeValue = "char";
-        typePointerValue = dataType->isUString() ? "unsigned char*" : "char *";
+        typePointerValue = "char *";
     }
 
     alloc["name"] = name.c_str();
