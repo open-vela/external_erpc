@@ -32,8 +32,7 @@
 #endif
 #elif ERPC_THREADS_IS(WIN32)
 #include "windows.h"
-
-#endif // ERPC_THREADS
+#endif // ERPC_THREADS_IS
 
 /*!
  * @addtogroup port_threads
