@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
+ * Copyright 2020 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -13,7 +14,9 @@
 #ifdef __cplusplus
 #include "erpc_codec.h"
 #include "erpc_config_internal.h"
-#include "erpc_client_server_common.h"
+#if ERPC_MESSAGE_LOGGING
+#include "erpc_message_loggers.h"
+#endif
 #if ERPC_NESTED_CALLS
 #include "erpc_server.h"
 #include "erpc_threading.h"
@@ -49,7 +52,11 @@ class Server;
  *
  * @ingroup infra_client
  */
-class ClientManager : public ClientServerCommon
+#if ERPC_MESSAGE_LOGGING
+class ClientManager : public MessageLoggers
+#else
+class ClientManager
+#endif
 {
 public:
     /*!
@@ -58,8 +65,12 @@ public:
      * This function initializes object attributes.
      */
     ClientManager(void)
-    : ClientServerCommon()
+#if ERPC_MESSAGE_LOGGING
+    : MessageLoggers()
     , m_messageFactory(NULL)
+#else
+    : m_messageFactory(NULL)
+#endif
     , m_codecFactory(NULL)
     , m_transport(NULL)
     , m_sequence(0)
