@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2020 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -131,16 +130,6 @@
             #error "Do not forget to add the MCMGR library into your project!"
         #endif
     #endif
-#endif
-
-// Disabling pre and post callback function related code.
-#if !defined(ERPC_PRE_POST_ACTION)
-    #define ERPC_PRE_POST_ACTION (ERPC_PRE_POST_ACTION_DISABLED)
-#endif
-
-// Disabling pre and post default callback function code.
-#if !defined(ERPC_PRE_POST_ACTION_DEFAULT)
-    #define ERPC_PRE_POST_ACTION_DEFAULT (ERPC_PRE_POST_ACTION_DEFAULT_DISABLED)
 #endif
 
 /* clang-format on */
