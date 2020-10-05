@@ -445,7 +445,6 @@ public:
  */
 int main(int argc, char *argv[], char *envp[])
 {
-    (void)envp;
     try
     {
         return erpcsniffer::erpcsnifferTool(argc, argv).run();
