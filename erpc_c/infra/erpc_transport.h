@@ -13,7 +13,6 @@
 #include "erpc_common.h"
 #include "erpc_crc16.h"
 #include "erpc_message_buffer.h"
-
 #include <cstring>
 
 /*!
@@ -84,7 +83,7 @@ public:
      *
      * @param[in] crcImpl Object containing crc-16 compute function.
      */
-    virtual void setCrc16(Crc16 *crcImpl) { (void)crcImpl; }
+    virtual void setCrc16(Crc16 *crcImpl){};
 };
 
 /*!

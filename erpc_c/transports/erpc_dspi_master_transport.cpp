@@ -8,12 +8,10 @@
  */
 
 #include "erpc_dspi_master_transport.h"
-
 #include "board.h"
 #include "fsl_dspi.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
-
 #include <cstdio>
 
 using namespace erpc;

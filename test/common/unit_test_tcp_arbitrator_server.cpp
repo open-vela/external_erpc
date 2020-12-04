@@ -11,13 +11,11 @@
 #include "erpc_simple_server.h"
 #include "erpc_tcp_transport.h"
 #include "erpc_transport_arbitrator.h"
-
 #include "Logging.h"
 #include "myAlloc.h"
 #include "test_firstInterface.h"
 #include "test_secondInterface.h"
 #include "unit_test.h"
-
 #include <unistd.h>
 
 using namespace erpc;

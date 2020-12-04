@@ -28,7 +28,6 @@
 #include "UnionType.h"
 #include "annotations.h"
 #include "cpptempl.h"
-
 #include <cstring>
 
 using namespace erpcgen;
@@ -95,7 +94,7 @@ Annotation *Symbol::findAnnotation(string name, Annotation::program_lang_t lang)
 vector<Annotation *> Symbol::getAnnotations(string name, Annotation::program_lang_t lang)
 {
     vector<Annotation *> anList;
-    for (unsigned int i = 0; i < m_annotations.size(); ++i)
+    for (int i = 0; i < m_annotations.size(); ++i)
     {
         if (m_annotations[i].getName() == name &&
             (m_annotations[i].getLang() == lang || m_annotations[i].getLang() == Annotation::kAll))
@@ -240,7 +239,7 @@ void SymbolScope::replaceSymbol(Symbol *oldSym, Symbol *newSym)
 
 int32_t SymbolScope::getSymbolPos(Symbol *sym)
 {
-    for (unsigned int i = 0; i < m_symbolVector.size(); i++)
+    for (int i = 0; i < m_symbolVector.size(); i++)
     {
         if (m_symbolVector[i] == sym)
         {
@@ -324,7 +323,7 @@ void StructType::addMember(StructMember *newMember)
 string StructType::getDescription() const
 {
     string members;
-    unsigned int n = 0;
+    int n = 0;
     for (auto it : m_members)
     {
         members += format_string("%d:", n);
@@ -364,7 +363,7 @@ void EnumType::addMember(EnumMember *newMember)
 string EnumType::getDescription() const
 {
     string members;
-    unsigned int n = 0;
+    int n = 0;
     for (auto it : m_members)
     {
         members += format_string("%d:", n);
@@ -438,7 +437,7 @@ const set<_param_direction> Group::getSymbolDirections(Symbol *symbol) const
 string Group::getDescription() const
 {
     string ifaces;
-    unsigned int n = 0;
+    int n = 0;
     for (auto it : m_interfaces)
     {
         ifaces += format_string("%d:", n);
@@ -476,12 +475,14 @@ DataType *DataType::getTrueContainerDataType()
     DataType *trueDataType = this->getTrueDataType();
     switch (trueDataType->getDataType())
     {
-        case DataType::kListType: {
+        case DataType::kListType:
+        {
             ListType *l = dynamic_cast<ListType *>(trueDataType);
             assert(l);
             return l->getElementType()->getTrueContainerDataType();
         }
-        case DataType::kArrayType: {
+        case DataType::kArrayType:
+        {
             ArrayType *a = dynamic_cast<ArrayType *>(trueDataType);
             assert(a);
             return a->getElementType()->getTrueContainerDataType();
@@ -516,7 +517,7 @@ void Interface::addFunction(Function *func)
 string Interface::getDescription() const
 {
     string fns;
-    unsigned int n = 0;
+    int n = 0;
     for (auto it : m_functions)
     {
         fns += format_string("%d:", n);
@@ -591,21 +592,21 @@ string UnionType::getDescription() const
 UnionType::case_vector_t UnionType::getUniqueCases()
 {
     UnionType::case_vector_t uniqueCases;
-    bool uniqueAddCase = true;
+    bool addCase = true;
     for (auto unionCase : getCases())
     {
         for (auto uniqueCase : uniqueCases)
         {
             if (casesAreTheSame(unionCase, uniqueCase))
             {
-                uniqueAddCase = false;
+                addCase = false;
             }
         }
-        if (uniqueAddCase)
+        if (addCase)
         {
             uniqueCases.push_back(unionCase);
         }
-        uniqueAddCase = true;
+        addCase = true;
     }
     return uniqueCases;
 }
@@ -618,7 +619,7 @@ bool UnionType::casesAreTheSame(UnionCase *a, UnionCase *b)
     {
         return false;
     }
-    for (unsigned int i = 0; i < aNames.size(); ++i)
+    for (int i = 0; i < aNames.size(); ++i)
     {
         if (aNames[i] != bNames[i])
         {

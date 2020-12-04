@@ -8,8 +8,7 @@
  */
 #include "erpc_transport_arbitrator.h"
 #include "erpc_config_internal.h"
-#include "erpc_config.h"
-
+#include <cassert>
 #include <cstdio>
 #include <string>
 
@@ -42,14 +41,14 @@ TransportArbitrator::~TransportArbitrator(void)
 
 void TransportArbitrator::setCrc16(Crc16 *crcImpl)
 {
-    erpc_assert(crcImpl);
-    erpc_assert(m_sharedTransport);
+    assert(crcImpl);
+    assert(m_sharedTransport);
     m_sharedTransport->setCrc16(crcImpl);
 }
 
 erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 {
-    erpc_assert(m_sharedTransport && "shared transport is not set");
+    assert(m_sharedTransport && "shared transport is not set");
 
     while (true)
     {
@@ -57,20 +56,9 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
         erpc_status_t err = m_sharedTransport->receive(message);
         if (err)
         {
-            // if we timeout, we must unblock all pending client(s)
-            if (err == kErpcStatus_Timeout)
-            {
-                PendingClientInfo *client = m_clientList;
-                for (; client; client = client->m_next)
-                {
-                    if (client->m_isValid)
-                    {
-                        client->m_sem.put();
-                    }
-                }
-            }
             return err;
         }
+
         m_codec->setBuffer(*message);
 
         // Parse the message header.
@@ -124,7 +112,7 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 
 erpc_status_t TransportArbitrator::send(MessageBuffer *message)
 {
-    erpc_assert(m_sharedTransport && "shared transport is not set");
+    assert(m_sharedTransport && "shared transport is not set");
     return m_sharedTransport->send(message);
 }
 
@@ -141,7 +129,7 @@ TransportArbitrator::client_token_t TransportArbitrator::prepareClientReceive(Re
 
 erpc_status_t TransportArbitrator::clientReceive(client_token_t token)
 {
-    erpc_assert(token != 0 && "invalid client token");
+    assert(token != 0 && "invalid client token");
 
     // Convert token to pointer to info struct for this client receive request.
     PendingClientInfo *info = reinterpret_cast<PendingClientInfo *>(token);

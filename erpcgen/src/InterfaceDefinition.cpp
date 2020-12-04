@@ -8,7 +8,6 @@
  */
 
 #include "InterfaceDefinition.h"
-
 #include "AstNode.h"
 #include "AstWalker.h"
 #include "ErpcLexer.h"
@@ -30,10 +29,10 @@ using namespace std;
 InterfaceDefinition::InterfaceDefinition()
 : m_ast(nullptr)
 , m_globals()
-, m_program(nullptr)
 , m_programName("")
 , m_outputFilename("")
 , m_codec(kNotSpecified)
+, m_program(nullptr)
 {
     init();
 }
@@ -84,7 +83,6 @@ void InterfaceDefinition::createBuiltinTypes()
     m_globals.addSymbol(new BuiltinType("float", BuiltinType::_builtin_type::kFloatType));
     m_globals.addSymbol(new BuiltinType("double", BuiltinType::_builtin_type::kDoubleType));
     m_globals.addSymbol(new BuiltinType("string", BuiltinType::_builtin_type::kStringType));
-    m_globals.addSymbol(new BuiltinType("ustring", BuiltinType::_builtin_type::kUStringType));
     m_globals.addSymbol(new BuiltinType("binary", BuiltinType::_builtin_type::kBinaryType));
 }
 

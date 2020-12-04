@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2017-2020 NXP
- * Copyright 2019 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -11,9 +10,8 @@
 #include "erpc_rpmsg_tty_rtos_transport.h"
 #include "erpc_config_internal.h"
 #include "erpc_framed_transport.h"
-#include "erpc_config.h"
-
 #include "rpmsg_ns.h"
+#include <cassert>
 
 using namespace erpc;
 using namespace std;
@@ -68,7 +66,7 @@ RPMsgTTYRTOSTransport::~RPMsgTTYRTOSTransport(void)
 
 void RPMsgTTYRTOSTransport::setCrc16(Crc16 *crcImpl)
 {
-    erpc_assert(crcImpl);
+    assert(crcImpl);
     m_crcImpl = crcImpl;
 }
 
@@ -144,13 +142,13 @@ erpc_status_t RPMsgTTYRTOSTransport::init(uint32_t src_addr, uint32_t dst_addr, 
 
 erpc_status_t RPMsgTTYRTOSTransport::receive(MessageBuffer *message)
 {
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    assert(m_crcImpl && "Uninitialized Crc16 object.");
     FramedTransport::Header h;
     char *buf = NULL;
     uint32_t length = 0;
 
     int32_t ret_val = rpmsg_queue_recv_nocopy(s_rpmsg, m_rpmsg_queue, &m_dst_addr, &buf, &length, RL_BLOCK);
-    erpc_assert(buf);
+    assert(buf);
 
     memcpy((uint8_t *)&h, buf, sizeof(h));
 
@@ -169,7 +167,7 @@ erpc_status_t RPMsgTTYRTOSTransport::receive(MessageBuffer *message)
 
 erpc_status_t RPMsgTTYRTOSTransport::send(MessageBuffer *message)
 {
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    assert(m_crcImpl && "Uninitialized Crc16 object.");
     FramedTransport::Header h;
     uint8_t *buf = message->get();
     uint32_t length = message->getLength();

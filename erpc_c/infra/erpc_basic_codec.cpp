@@ -8,7 +8,7 @@
  */
 
 #include "erpc_basic_codec.h"
-#include "erpc_config.h"
+#include <cassert>
 
 using namespace erpc;
 
@@ -140,7 +140,7 @@ void BasicCodec::writeNullFlag(bool isNull)
 
 void BasicCodec::writeCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, funPtr callback)
 {
-    erpc_assert(callbacksCount > 1);
+    assert(callbacksCount > 1);
     // callbacks = callbacks table
     for (uint8_t i = 0; i < callbacksCount; i++)
     {
@@ -334,7 +334,7 @@ void BasicCodec::readNullFlag(bool *isNull)
 
 void BasicCodec::readCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, funPtr *callback)
 {
-    erpc_assert(callbacksCount > 1);
+    assert(callbacksCount > 1);
     // callbacks = callbacks table
     uint8_t _tmp_local;
     read(&_tmp_local);

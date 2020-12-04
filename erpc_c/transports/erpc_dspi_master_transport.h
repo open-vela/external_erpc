@@ -11,9 +11,7 @@
 #define _EMBEDDED_RPC__DSPI_MASTER_TRANSPORT_H_
 
 #include "erpc_framed_transport.h"
-
 #include "fsl_dspi.h"
-
 #include <stdlib.h>
 
 /*!

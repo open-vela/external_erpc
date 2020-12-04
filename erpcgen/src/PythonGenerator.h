@@ -12,7 +12,6 @@
 
 #include "Generator.h"
 #include "cpptempl.h"
-
 #include <set>
 #include <string>
 

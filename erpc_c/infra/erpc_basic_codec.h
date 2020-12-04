@@ -11,7 +11,6 @@
 #define _EMBEDDED_RPC__BASIC_SERIALIZATION_H_
 
 #include "erpc_codec.h"
-
 #include <new>
 
 /*!

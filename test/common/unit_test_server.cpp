@@ -10,7 +10,6 @@
 #include "erpc_server_setup.h"
 #include "erpc_simple_server.h"
 #include "erpc_transport_setup.h"
-
 #include "board.h"
 #include "myAlloc.h"
 #include "test_unit_test_common_server.h"
@@ -66,8 +65,6 @@ void SystemInitHook(void)
 
 int main(int argc, const char *argv[])
 {
-    BOARD_InitHardware();
-
 #if (defined(RPMSG) || defined(MU))
     uint32_t startupData;
     mcmgr_status_t status;

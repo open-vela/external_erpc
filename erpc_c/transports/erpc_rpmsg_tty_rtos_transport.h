@@ -13,7 +13,6 @@
 #include "erpc_crc16.h"
 #include "erpc_message_buffer.h"
 #include "erpc_rpmsg_lite_base_transport.h"
-
 #include "rpmsg_lite.h"
 #include "rpmsg_queue.h"
 
@@ -36,7 +35,7 @@ namespace erpc {
  * @brief Transport that uses RPMsg zero copy RTOS API for interprocessor
  * messaging.
  *
- * @ingroup rpmsg_tty_rtos_transport
+ * @ingroup rpmsg_lite_rtos_transport
  */
 class RPMsgTTYRTOSTransport : public RPMsgBaseTransport
 {
