@@ -11,6 +11,7 @@
 #include "erpc_threading.h"
 
 #include "platform/CriticalSectionLock.h"
+#include "platform/mbed_assert.h"
 
 #if ERPC_THREADS_IS(MBED)
 

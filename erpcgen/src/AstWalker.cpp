@@ -8,7 +8,6 @@
  */
 
 #include "AstWalker.h"
-
 #include "ErpcLexer.h"
 #include "Logging.h"
 

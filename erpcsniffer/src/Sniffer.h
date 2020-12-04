@@ -11,9 +11,7 @@
 
 #include "erpc_c/infra/erpc_basic_codec.h"
 #include "erpc_c/infra/erpc_transport.h"
-
 #include "CGenerator.h"
-
 #include <chrono>
 ////////////////////////////////////////////////////////////////////////////////
 // Classes

@@ -23,7 +23,7 @@
 #ifndef MYSERIAL_H_
 #define MYSERIAL_H_
 
-#ifdef __APPLE__
+#ifdef MACOSX
 #include <IOKit/serial/ioss.h>
 #include <sys/ioctl.h>
 
@@ -34,7 +34,7 @@
 
 #include <stdint.h>
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <time.h>
 #include <windows.h>
 

@@ -11,7 +11,6 @@
 #define _EMBEDDED_RPC__RPMSG_LITE_BASE_TRANSPORT_H_
 
 #include "erpc_transport.h"
-
 #include "rpmsg_lite.h"
 
 /*!

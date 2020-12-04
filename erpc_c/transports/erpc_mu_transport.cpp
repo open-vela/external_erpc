@@ -7,9 +7,7 @@
  */
 
 #include "erpc_mu_transport.h"
-
 #include "erpc_config_internal.h"
-
 #include "board.h"
 
 using namespace erpc;

@@ -13,7 +13,6 @@
 #include "erpc_common.h"
 #include "erpc_message_buffer.h"
 #include "erpc_transport.h"
-
 #include <cstring>
 #include <stdint.h>
 
@@ -31,8 +30,7 @@ namespace erpc {
 /*!
  * @brief Types of messages that can be encoded.
  */
-typedef enum _message_type
-{
+typedef enum _message_type {
     kInvocationMessage = 0,
     kOnewayMessage,
     kReplyMessage,

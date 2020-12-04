@@ -13,7 +13,6 @@
 #include "DataType.h"
 #include "StructMember.h"
 #include "SymbolScope.h"
-
 #include <string>
 #include <vector>
 

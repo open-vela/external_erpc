@@ -7,7 +7,6 @@
  */
 
 #include "erpc_simple_server.h"
-
 #include "gtest.h"
 #include "test_firstInterface.h"
 #include "test_secondInterface_server.h"

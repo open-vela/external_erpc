@@ -12,7 +12,6 @@
 
 #include "Token.h"
 #include "smart_ptr.h"
-
 #include <map>
 #include <stack>
 #include <string>

@@ -9,7 +9,7 @@
 
 #include "erpc_arbitrated_client_manager.h"
 #include "erpc_transport_arbitrator.h"
-#include "erpc_config.h"
+#include "assert.h"
 
 #if ERPC_THREADS_IS(NONE)
 #error "Arbitrator code does not work in no-threading configuration."
@@ -23,10 +23,8 @@ using namespace erpc;
 
 #if ERPC_NESTED_CALLS_DETECTION
 extern bool nestingDetection;
-#ifndef _WIN32
 #pragma weak nestingDetection
 bool nestingDetection = false;
-#endif
 #endif
 
 void ArbitratedClientManager::setArbitrator(TransportArbitrator *arbitrator)
@@ -37,7 +35,7 @@ void ArbitratedClientManager::setArbitrator(TransportArbitrator *arbitrator)
 
 void ArbitratedClientManager::performClientRequest(RequestContext &request)
 {
-    erpc_assert(m_arbitrator && "arbitrator not set");
+    assert(m_arbitrator && "arbitrator not set");
 
     TransportArbitrator::client_token_t token = 0;
 

@@ -7,12 +7,9 @@
  */
 
 #include "Sniffer.h"
-
 #include "erpc_c/infra/erpc_message_buffer.h"
-
 #include "Logging.h"
 #include "annotations.h"
-
 #include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <cstdio>
@@ -78,8 +75,8 @@ erpc_status_t Sniffer::run()
                                     0 :
                                     chrono::duration_cast<chrono::nanoseconds>(currentTime - previousTime).count());
         uint32_t timeDifferenceSize = timeDifference.size();
-        uint32_t diffCountSpaces = floor((timeDifferenceSize - 1) / 3);
-        for (uint32_t i = 1; i <= diffCountSpaces; ++i)
+        uint32_t countSpaces = floor((timeDifferenceSize - 1) / 3);
+        for (uint32_t i = 1; i <= countSpaces; ++i)
         {
             timeDifference = timeDifference.insert(timeDifferenceSize - i * 3, " ");
         }
@@ -190,7 +187,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
     erpc_status_t err;
     switch (dataType->getDataType())
     {
-        case DataType::_data_type::kAliasType: {
+        case DataType::_data_type::kAliasType:
+        {
             AliasType *aliasType = dynamic_cast<AliasType *>(dataType);
             assert(aliasType);
             string parseDataInfo;
@@ -204,7 +202,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             addSpaces(parsedDataInfo, 2);
             break;
         }
-        case DataType::_data_type::kArrayType: {
+        case DataType::_data_type::kArrayType:
+        {
             ArrayType *arrayType = dynamic_cast<ArrayType *>(dataType);
             assert(arrayType);
             uint32_t arraySize = arrayType->getElementCount();
@@ -227,13 +226,15 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             }
             break;
         }
-        case DataType::_data_type::kBuiltinType: {
+        case DataType::_data_type::kBuiltinType:
+        {
             parsedDataInfo = " value: ";
             BuiltinType *builtinType = dynamic_cast<BuiltinType *>(dataType);
             assert(builtinType);
             switch (builtinType->getBuiltinType())
             {
-                case BuiltinType::_builtin_type::kBoolType: {
+                case BuiltinType::_builtin_type::kBoolType:
+                {
                     bool value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -243,7 +244,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "bool" + parsedDataInfo + ((value) ? "true" : "false");
                     break;
                 }
-                case BuiltinType::_builtin_type::kInt8Type: {
+                case BuiltinType::_builtin_type::kInt8Type:
+                {
                     int8_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -253,7 +255,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "int8_t" + parsedDataInfo + format_string("%d", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kInt16Type: {
+                case BuiltinType::_builtin_type::kInt16Type:
+                {
                     int16_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -263,7 +266,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "int16_t" + parsedDataInfo + format_string("%d", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kInt32Type: {
+                case BuiltinType::_builtin_type::kInt32Type:
+                {
                     int32_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -273,7 +277,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "int32_t" + parsedDataInfo + format_string("%d", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kInt64Type: {
+                case BuiltinType::_builtin_type::kInt64Type:
+                {
                     int64_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -283,7 +288,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "int64_t" + parsedDataInfo + format_string("%ld", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kUInt8Type: {
+                case BuiltinType::_builtin_type::kUInt8Type:
+                {
                     uint8_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -293,7 +299,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "uint8_t" + parsedDataInfo + format_string("%u", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kUInt16Type: {
+                case BuiltinType::_builtin_type::kUInt16Type:
+                {
                     uint16_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -303,7 +310,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "uint16_t" + parsedDataInfo + format_string("%u", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kUInt32Type: {
+                case BuiltinType::_builtin_type::kUInt32Type:
+                {
                     uint32_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -313,7 +321,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "uint32_t" + parsedDataInfo + format_string("%u", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kUInt64Type: {
+                case BuiltinType::_builtin_type::kUInt64Type:
+                {
                     uint64_t value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -323,7 +332,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "uint64_t" + parsedDataInfo + format_string("%lu", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kFloatType: {
+                case BuiltinType::_builtin_type::kFloatType:
+                {
                     float value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -333,7 +343,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "float" + parsedDataInfo + format_string("%f", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kDoubleType: {
+                case BuiltinType::_builtin_type::kDoubleType:
+                {
                     double value;
                     m_codec->read(&value);
                     if ((err = m_codec->getStatus()))
@@ -343,7 +354,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "double" + parsedDataInfo + format_string("%f", value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kStringType: {
+                case BuiltinType::_builtin_type::kStringType:
+                {
                     char *value;
                     uint32_t length;
                     m_codec->readString(&length, &value);
@@ -354,7 +366,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                     parsedDataInfo = "string" + parsedDataInfo + format_string("%.*s", length, value);
                     break;
                 }
-                case BuiltinType::_builtin_type::kBinaryType: {
+                case BuiltinType::_builtin_type::kBinaryType:
+                {
                     uint8_t *value;
                     uint32_t length;
                     m_codec->readBinary(&length, &value);
@@ -363,23 +376,25 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
                         return err;
                     }
                     string binaryValue;
-                    for (unsigned int i = 0; i < length; ++i)
+                    for (int i = 0; i < length; ++i)
                     {
                         binaryValue += format_string("%d|", value[i]);
                     }
                     parsedDataInfo = "binary" + parsedDataInfo + binaryValue;
                     break;
                 }
-                default: {
+                default:
+                {
                     throw runtime_error("Unrecognized builtin type.\n");
                 }
             }
             break;
         }
-        case DataType::_data_type::kEnumType: {
+        case DataType::_data_type::kEnumType:
+        {
             EnumType *e = dynamic_cast<EnumType *>(dataType);
             assert(e);
-            uint32_t value;
+            int32_t value;
             m_codec->read(&value);
             if ((err = m_codec->getStatus()))
             {
@@ -401,7 +416,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             parsedDataInfo = format_string("%s value: %s", e->getName().c_str(), enumMemberName.c_str());
             break;
         }
-        case DataType::_data_type::kFunctionType: {
+        case DataType::_data_type::kFunctionType:
+        {
             FunctionType *f = dynamic_cast<FunctionType *>(dataType);
             assert(f);
             int32_t value;
@@ -421,7 +437,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             }
             break;
         }
-        case DataType::_data_type::kListType: {
+        case DataType::_data_type::kListType:
+        {
             ListType *listType = dynamic_cast<ListType *>(dataType);
             assert(listType);
             uint32_t listSize;
@@ -430,7 +447,7 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             {
                 return err;
             }
-            for (unsigned int i = 0; i < listSize; i++)
+            for (int i = 0; i < listSize; i++)
             {
                 string parseDataInfo;
                 err = parseDataType(listType->getElementType(), parseDataInfo);
@@ -451,12 +468,13 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             }
             break;
         }
-        case DataType::_data_type::kStructType: {
+        case DataType::_data_type::kStructType:
+        {
             StructType *structType = dynamic_cast<StructType *>(dataType);
             assert(structType);
             parsedDataInfo = "struct " + structType->getName() + ":\n";
             StructType::member_vector_t members = structType->getMembers();
-            for (unsigned int i = 0; i < members.size(); ++i)
+            for (int i = 0; i < members.size(); ++i)
             {
                 string parseDataInfo;
                 err = parseMemberType(structType, members[i], parseDataInfo);
@@ -476,7 +494,8 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             addSpaces(parsedDataInfo, 2);
             break;
         }
-        case DataType::_data_type::kUnionType: {
+        case DataType::_data_type::kUnionType:
+        {
             UnionType *unionType = dynamic_cast<UnionType *>(dataType);
             assert(unionType);
             int32_t discriminator;
@@ -526,11 +545,13 @@ erpc_status_t Sniffer::parseDataType(DataType *dataType, string &parsedDataInfo)
             addSpaces(parsedDataInfo, 2);
             break;
         }
-        case DataType::_data_type::kVoidType: {
+        case DataType::_data_type::kVoidType:
+        {
             parsedDataInfo = "void";
             break;
         }
-        default: {
+        default:
+        {
             throw runtime_error("Unrecognized data type.\n");
         }
     }
@@ -649,12 +670,14 @@ string Sniffer::getDataTypeName(DataType *dataType)
 {
     switch (dataType->getDataType())
     {
-        case DataType::kListType: {
+        case DataType::kListType:
+        {
             ListType *listType = dynamic_cast<ListType *>(dataType);
             assert(listType);
             return "list<" + getDataTypeName(listType->getElementType()) + ">";
         }
-        case DataType::kArrayType: {
+        case DataType::kArrayType:
+        {
             string returnVal;
             while (dataType->isArray())
             {
@@ -665,7 +688,8 @@ string Sniffer::getDataTypeName(DataType *dataType)
             }
             return getDataTypeName(dataType) + returnVal;
         }
-        case DataType::kVoidType: {
+        case DataType::kVoidType:
+        {
             return "void";
         }
         default:
