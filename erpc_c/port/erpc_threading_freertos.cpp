@@ -8,6 +8,7 @@
  */
 
 #include "erpc_threading.h"
+
 #include <cassert>
 #include <errno.h>
 
@@ -175,7 +176,7 @@ void Thread::threadEntryPointStub(void *arg)
 Mutex::Mutex(void)
 : m_mutex(0)
 {
-    m_mutex = xSemaphoreCreateMutex();
+    m_mutex = xSemaphoreCreateRecursiveMutex();
 }
 
 Mutex::~Mutex(void)
