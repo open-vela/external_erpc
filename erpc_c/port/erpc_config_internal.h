@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
+ * Copyright 2020 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -28,6 +29,15 @@
     #endif
 #endif
 
+// Determine if we are targeting WIN32 environment
+#if !defined(ERPC_HAS_WIN32)
+    #if defined(_WIN32)
+        #define ERPC_HAS_WIN32 (1)
+    #else
+        #define ERPC_HAS_WIN32 (0)
+    #endif
+#endif
+
 // Safely detect FreeRTOSConfig.h.
 #define ERPC_HAS_FREERTOSCONFIG_H (0)
 #if defined(__has_include)
@@ -45,7 +55,7 @@
     #elif ERPC_HAS_FREERTOSCONFIG_H
         // Use FreeRTOS if we can auto detect it.
         #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
-    #elif defined(WIN32)
+    #elif ERPC_HAS_WIN32
         #define ERPC_THREADS (ERPC_THREADS_WIN32)
     #else
         // Otherwise default to no threads.
@@ -130,6 +140,16 @@
             #error "Do not forget to add the MCMGR library into your project!"
         #endif
     #endif
+#endif
+
+// Disabling pre and post callback function related code.
+#if !defined(ERPC_PRE_POST_ACTION)
+    #define ERPC_PRE_POST_ACTION (ERPC_PRE_POST_ACTION_DISABLED)
+#endif
+
+// Disabling pre and post default callback function code.
+#if !defined(ERPC_PRE_POST_ACTION_DEFAULT)
+    #define ERPC_PRE_POST_ACTION_DEFAULT (ERPC_PRE_POST_ACTION_DEFAULT_DISABLED)
 #endif
 
 /* clang-format on */

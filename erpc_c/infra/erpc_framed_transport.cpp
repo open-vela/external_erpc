@@ -9,6 +9,7 @@
 
 #include "erpc_framed_transport.h"
 #include "erpc_message_buffer.h"
+
 #include <cassert>
 #include <cstdio>
 
@@ -51,6 +52,12 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
         if (ret != kErpcStatus_Success)
         {
             return ret;
+        }
+
+        // received size can't be zero.
+        if (h.m_messageSize == 0)
+        {
+            return kErpcStatus_ReceiveFailed;
         }
 
         // received size can't be larger then buffer length.
