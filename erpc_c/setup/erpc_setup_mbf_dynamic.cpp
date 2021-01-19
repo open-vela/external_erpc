@@ -28,7 +28,7 @@ using namespace erpc;
 class DynamicMessageBufferFactory : public MessageBufferFactory
 {
 public:
-    virtual MessageBuffer create(void)
+    virtual MessageBuffer create()
     {
         uint8_t *buf = new (nothrow) uint8_t[ERPC_DEFAULT_BUFFER_SIZE];
         return MessageBuffer(buf, ERPC_DEFAULT_BUFFER_SIZE);

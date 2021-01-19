@@ -187,7 +187,7 @@ protected:
 #endif
 
     //! @brief Validate that an incoming message is a reply.
-    virtual erpc_status_t verifyReply(RequestContext &request);
+    virtual void verifyReply(RequestContext &request);
 
     /*!
      * @brief Create message buffer and codec.
@@ -200,8 +200,8 @@ protected:
     Codec *createBufferAndCodec(void);
 
 private:
-    ClientManager(const ClientManager &other);            //!< Disable copy ctor.
-    ClientManager &operator=(const ClientManager &other); //!< Disable copy ctor.
+    ClientManager(const ClientManager &);            //!< Disable copy ctor.
+    ClientManager &operator=(const ClientManager &); //!< Disable copy ctor.
 };
 
 /*!

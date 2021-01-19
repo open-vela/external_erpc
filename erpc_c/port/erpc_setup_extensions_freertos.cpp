@@ -17,7 +17,7 @@ using namespace erpc;
 static Semaphore *s_erpc_call_in_progress = NULL;
 static TimerHandle_t s_erpc_call_timer_cb = NULL;
 
-void erpc::erpc_pre_cb_default(void)
+void erpc::erpc_pre_cb_default()
 {
     assert(s_erpc_call_in_progress &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
@@ -27,13 +27,13 @@ void erpc::erpc_pre_cb_default(void)
     xTimerStart(s_erpc_call_timer_cb, 0);
 }
 
-void erpc::erpc_post_cb_default(void)
+void erpc::erpc_post_cb_default()
 {
     xTimerStop(s_erpc_call_timer_cb, 0);
     s_erpc_call_in_progress->put();
 }
 
-static void erpc_call_timer_cb_default(TimerHandle_t xTimer)
+void erpc_call_timer_cb_default(TimerHandle_t xTimer)
 {
     assert(1 != 1 && "eRPC task freezed.");
 }
@@ -49,7 +49,7 @@ void erpc_init_call_progress_detection_default(
     assert(s_erpc_call_timer_cb && "Creating eRPC timer failed.");
 }
 
-void erpc_deinit_call_progress_detection_default(void)
+void erpc_deinit_call_progress_detection_default()
 {
     if (s_erpc_call_in_progress)
     {
@@ -64,7 +64,7 @@ void erpc_deinit_call_progress_detection_default(void)
     }
 }
 
-bool erpc_is_call_in_progress_default(void)
+bool erpc_is_call_in_progress_default()
 {
     assert(s_erpc_call_in_progress &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
@@ -76,7 +76,7 @@ bool erpc_is_call_in_progress_default(void)
     return true;
 }
 
-void erpc_reset_in_progress_state_default(void)
+void erpc_reset_in_progress_state_default()
 {
 
     assert(s_erpc_call_in_progress &&
