@@ -87,7 +87,7 @@ bool Thread::operator==(Thread &o)
     return m_task == o.m_task;
 }
 
-Thread *Thread::getCurrentThread(void)
+Thread *Thread::getCurrentThread()
 {
     TaskHandle_t thisTask = xTaskGetCurrentTaskHandle();
 
