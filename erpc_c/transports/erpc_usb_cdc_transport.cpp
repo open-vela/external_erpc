@@ -33,16 +33,18 @@ static void ERPC_SerialManagerTxCallback(void *callbackParam, serial_manager_cal
                                          serial_manager_status_t status)
 {
     UsbCdcTransport *transport = s_usbcdc_instance;
-    if ((NULL != callbackParam) && (NULL != message))
+    if ((NULL == callbackParam) || (NULL == message))
     {
-        if (kStatus_SerialManager_Success == status)
-        {
-            transport->tx_cb();
-        }
-        else
-        {
-            /* Handle other status if needed */
-        }
+        return;
+    }
+
+    if (kStatus_SerialManager_Success == status)
+    {
+        transport->tx_cb();
+    }
+    else
+    {
+        /* Handle other status if needed */
     }
 }
 
@@ -50,16 +52,18 @@ static void ERPC_SerialManagerRxCallback(void *callbackParam, serial_manager_cal
                                          serial_manager_status_t status)
 {
     UsbCdcTransport *transport = s_usbcdc_instance;
-    if ((NULL != callbackParam) && (NULL != message))
+    if ((NULL == callbackParam) || (NULL == message))
     {
-        if (kStatus_SerialManager_Success == status)
-        {
-            transport->rx_cb();
-        }
-        else
-        {
-            /* Handle other status if needed */
-        }
+        return;
+    }
+
+    if (kStatus_SerialManager_Success == status)
+    {
+        transport->rx_cb();
+    }
+    else
+    {
+        /* Handle other status if needed */
     }
 }
 
@@ -107,8 +111,6 @@ UsbCdcTransport::~UsbCdcTransport(void)
 
 erpc_status_t UsbCdcTransport::init(void)
 {
-    erpc_status_t status = kErpcStatus_InitFailed;
-
     /* Init Serial Manager for USB CDC */
     m_serialConfig->type = kSerialPort_UsbCdc;
     m_serialConfig->ringBuffer = m_usbRingBuffer;
@@ -129,20 +131,18 @@ erpc_status_t UsbCdcTransport::init(void)
                                                                                          ERPC_SerialManagerRxCallback,
                                                                                          s_serialReadHandle))
                     {
-                        status = kErpcStatus_Success;
+                        return kErpcStatus_Success;
                     }
                 }
             }
         }
     }
 
-    return status;
+    return kErpcStatus_InitFailed;
 }
 
 erpc_status_t UsbCdcTransport::underlyingReceive(uint8_t *data, uint32_t size)
 {
-    erpc_status_t status = kErpcStatus_ReceiveFailed;
-
     s_isTransferReceiveCompleted = false;
 
     if (kStatus_SerialManager_Success == SerialManager_ReadNonBlocking(s_serialReadHandle, data, size))
@@ -155,19 +155,17 @@ erpc_status_t UsbCdcTransport::underlyingReceive(uint8_t *data, uint32_t size)
         {
         }
 #endif
-        status = kErpcStatus_Success;
+        return kErpcStatus_Success;
     }
 
-    return status;
+    return kErpcStatus_ReceiveFailed;
 }
 
 erpc_status_t UsbCdcTransport::underlyingSend(const uint8_t *data, uint32_t size)
 {
-    erpc_status_t status = kErpcStatus_SendFailed;
-
     s_isTransferSendCompleted = false;
 
-    if (kStatus_SerialManager_Success == SerialManager_WriteNonBlocking(s_serialWriteHandle, data, size))
+    if (kStatus_SerialManager_Success == SerialManager_WriteNonBlocking(s_serialWriteHandle, (uint8_t *)data, size))
     {
 /* wait until the sending is finished */
 #if !ERPC_THREADS_IS(NONE)
@@ -177,8 +175,8 @@ erpc_status_t UsbCdcTransport::underlyingSend(const uint8_t *data, uint32_t size
         {
         }
 #endif
-        status = kErpcStatus_Success;
+        return kErpcStatus_Success;
     }
 
-    return status;
+    return kErpcStatus_SendFailed;
 }

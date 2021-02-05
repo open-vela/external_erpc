@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -65,11 +64,6 @@ static inline void DSpiSlaveTransport_NotifyTransferGpioReady(void)
 /* @brief Notify the SPI Master that the Slave has finished the transfer */
 static inline void DSpiSlaveTransport_NotifyTransferGpioCompleted(void)
 {
-    (void)base;
-    (void)handle;
-    (void)status;
-    (void)userData;
-
     GPIO_PortSet(ERPC_BOARD_DSPI_INT_GPIO, 1U << ERPC_BOARD_DSPI_INT_PIN);
 }
 #endif
@@ -142,7 +136,7 @@ erpc_status_t DspiSlaveTransport::underlyingReceive(uint8_t *data, uint32_t size
 #endif
     }
 
-    return (status != kStatus_Success) ? kErpcStatus_ReceiveFailed : kErpcStatus_Success;
+    return status != kStatus_Success ? kErpcStatus_ReceiveFailed : kErpcStatus_Success;
 }
 
 erpc_status_t DspiSlaveTransport::underlyingSend(const uint8_t *data, uint32_t size)
@@ -193,5 +187,5 @@ erpc_status_t DspiSlaveTransport::underlyingSend(const uint8_t *data, uint32_t s
     delete[] dspiData;
 #endif
 
-    return (status != kStatus_Success) ? kErpcStatus_SendFailed : kErpcStatus_Success;
+    return status != kStatus_Success ? kErpcStatus_SendFailed : kErpcStatus_Success;
 }

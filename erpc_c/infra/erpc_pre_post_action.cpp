@@ -1,7 +1,6 @@
 /*
  * Copyright 2020 NXP
  * Copyright 2020 ACRIOS Systems s.r.o.
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -24,7 +23,7 @@ using namespace std;
 
 void PrePostAction::addPreCB(pre_post_action_cb preCB)
 {
-    if (preCB != NULL)
+    if (preCB)
     {
         m_preCB = preCB;
     }
@@ -38,7 +37,7 @@ void PrePostAction::addPreCB(pre_post_action_cb preCB)
 
 void PrePostAction::addPostCB(pre_post_action_cb postCB)
 {
-    if (postCB != NULL)
+    if (postCB)
     {
         m_postCB = postCB;
     }

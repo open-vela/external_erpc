@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -95,7 +94,7 @@ Thread *Thread::getCurrentThread(void)
     // Walk the threads list to find the Thread object for the current task.
     taskENTER_CRITICAL();
     Thread *it = s_first;
-    while (it != NULL)
+    while (it)
     {
         if (it->m_task == thisTask)
         {
@@ -116,7 +115,7 @@ void Thread::sleep(uint32_t usecs)
 
 void Thread::threadEntryPoint(void)
 {
-    if (m_entry != NULL)
+    if (m_entry)
     {
         m_entry(m_arg);
     }
@@ -132,7 +131,7 @@ void Thread::threadEntryPointStub(void *arg)
     taskENTER_CRITICAL();
     Thread *it = s_first;
     Thread *prev = NULL;
-    while (it != NULL)
+    while (it)
     {
         if (it == _this)
         {
@@ -140,12 +139,9 @@ void Thread::threadEntryPointStub(void *arg)
             {
                 s_first = _this->m_next;
             }
-            else
+            else if (prev)
             {
-                if (prev != NULL)
-                {
-                    prev->m_next = _this->m_next;
-                }
+                prev->m_next = _this->m_next;
             }
             _this->m_next = NULL;
 
@@ -235,16 +231,16 @@ bool Semaphore::get(uint32_t timeout)
     {
         timeout = portMAX_DELAY;
     }
-    else
+    else if (timeout > portMAX_DELAY - 1)
     {
-        if (timeout > (portMAX_DELAY - 1))
-        {
-            timeout = portMAX_DELAY - 1;
-        }
+        timeout = portMAX_DELAY - 1;
     }
 #endif
-
-    return (pdTRUE == xSemaphoreTake(m_sem, timeout / 1000 / portTICK_PERIOD_MS));
+    if (pdTRUE != xSemaphoreTake(m_sem, timeout / 1000 / portTICK_PERIOD_MS))
+    {
+        return false;
+    }
+    return true;
 }
 
 int Semaphore::getCount(void) const

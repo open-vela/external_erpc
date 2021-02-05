@@ -1,6 +1,5 @@
 /*
  * Copyright 2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -75,7 +74,7 @@ void Thread::sleep(uint32_t usecs)
 
 void Thread::threadEntryPoint(void)
 {
-    if (m_entry != NULL)
+    if (m_entry)
     {
         m_entry(m_arg);
     }
@@ -137,7 +136,7 @@ bool Semaphore::get(uint32_t timeout)
 
 int Semaphore::getCount(void) const
 {
-    return k_sem_count_get(m_sem);
+    return k_sem_count_get(m_sem));
 }
 #endif /* ERPC_THREADS_IS(FREERTOS) */
 
