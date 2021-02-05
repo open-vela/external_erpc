@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -77,9 +76,7 @@ static void TransferCallback(uint32_t event)
 
 erpc_status_t UartTransport::init(void)
 {
-    erpc_status_t erpcStatus = kErpcStatus_InitFailed;
     int32_t status = (*m_uartDrv).Initialize(TransferCallback);
-
     if (status == ARM_DRIVER_OK)
     {
         status = (*m_uartDrv).PowerControl(ARM_POWER_FULL); /* Enable Receiver and Transmitter lines */
@@ -91,22 +88,20 @@ erpc_status_t UartTransport::init(void)
                 status = m_uartDrv->Control(ARM_USART_CONTROL_RX, 1);
                 if (status == ARM_DRIVER_OK)
                 {
-                    erpcStatus = kErpcStatus_Success;
+                    return kErpcStatus_Success;
                 }
             }
         }
     }
 
-    return erpcStatus;
+    return kErpcStatus_InitFailed;
 }
 
 erpc_status_t UartTransport::underlyingReceive(uint8_t *data, uint32_t size)
 {
-    erpc_status_t erpcStatus = kErpcStatus_ReceiveFailed;
-    int32_t status = (*m_uartDrv).Receive(data, size);
-
     s_isTransferReceiveCompleted = false;
 
+    int32_t status = (*m_uartDrv).Receive(data, size);
     if (status == ARM_DRIVER_OK)
     {
 /* wait until the receiving is finished */
@@ -117,19 +112,17 @@ erpc_status_t UartTransport::underlyingReceive(uint8_t *data, uint32_t size)
         {
         }
 #endif
-        erpcStatus = kErpcStatus_Success;
+        return kErpcStatus_Success;
     }
 
-    return erpcStatus;
+    return kErpcStatus_ReceiveFailed;
 }
 
 erpc_status_t UartTransport::underlyingSend(const uint8_t *data, uint32_t size)
 {
-    erpc_status_t erpcStatus = kErpcStatus_SendFailed;
-    int32_t status = (*m_uartDrv).Send(data, size);
-
     s_isTransferSendCompleted = false;
 
+    int32_t status = (*m_uartDrv).Send(data, size);
     if (status == ARM_DRIVER_OK)
     {
 /* wait until the sending is finished */
@@ -140,8 +133,8 @@ erpc_status_t UartTransport::underlyingSend(const uint8_t *data, uint32_t size)
         {
         }
 #endif
-        erpcStatus = kErpcStatus_Success;
+        return kErpcStatus_Success;
     }
 
-    return erpcStatus;
+    return kErpcStatus_SendFailed;
 }

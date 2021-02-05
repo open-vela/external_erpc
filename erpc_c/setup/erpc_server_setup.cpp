@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2020-2021 ACRIOS Systems s.r.o.
+ * Copyright 2020 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -40,14 +40,12 @@ erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_bu
 {
     assert(transport);
 
-    Transport *castedTransport;
-
     // Init factories.
     s_codecFactory.construct();
 
     // Init server with the provided transport.
     s_server.construct();
-    castedTransport = reinterpret_cast<Transport *>(transport);
+    Transport *castedTransport = reinterpret_cast<Transport *>(transport);
     s_crc16.construct();
     castedTransport->setCrc16(s_crc16.get());
     s_server->setTransport(castedTransport);
@@ -67,7 +65,7 @@ void erpc_server_deinit(void)
 
 void erpc_add_service_to_server(void *service)
 {
-    if ((g_server != NULL) && (service != NULL))
+    if (g_server != NULL && service != NULL)
     {
         g_server->addService(static_cast<erpc::Service *>(service));
     }
@@ -75,7 +73,7 @@ void erpc_add_service_to_server(void *service)
 
 void erpc_remove_service_from_server(void *service)
 {
-    if ((g_server != NULL) && (service != NULL))
+    if (g_server != NULL && service != NULL)
     {
         g_server->removeService(static_cast<erpc::Service *>(service));
     }
@@ -88,34 +86,20 @@ void erpc_server_set_crc(uint32_t crcStart)
 
 erpc_status_t erpc_server_run(void)
 {
-    erpc_status_t status;
-
-    if (g_server == NULL)
+    if (g_server != NULL)
     {
-        status = kErpcStatus_Fail;
+        return g_server->run();
     }
-    else
-    {
-        status = g_server->run();
-    }
-
-    return status;
+    return kErpcStatus_Fail;
 }
 
 erpc_status_t erpc_server_poll(void)
 {
-    erpc_status_t status;
-
-    if (g_server == NULL)
+    if (g_server != NULL)
     {
-        status = kErpcStatus_Fail;
+        return g_server->poll();
     }
-    else
-    {
-        status = g_server->poll();
-    }
-
-    return status;
+    return kErpcStatus_Fail;
 }
 
 void erpc_server_stop(void)
@@ -129,18 +113,11 @@ void erpc_server_stop(void)
 #if ERPC_MESSAGE_LOGGING
 bool erpc_server_add_message_logger(erpc_transport_t transport)
 {
-    bool retVal;
-
-    if (g_server == NULL)
+    if (g_server != NULL)
     {
-        retVal = false;
+        return g_server->addMessageLogger(reinterpret_cast<Transport *>(transport));
     }
-    else
-    {
-        retVal = g_server->addMessageLogger(reinterpret_cast<Transport *>(transport));
-    }
-
-    return retVal;
+    return false;
 }
 #endif
 

@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -40,10 +39,9 @@ void ArbitratedClientManager::setArbitrator(TransportArbitrator *arbitrator)
 
 void ArbitratedClientManager::performClientRequest(RequestContext &request)
 {
-    erpc_status_t err;
-    TransportArbitrator::client_token_t token = 0;
-
     assert(m_arbitrator && "arbitrator not set");
+
+    TransportArbitrator::client_token_t token = 0;
 
     // Set up the client receive before we send the request, so if the reply is sent
     // before we get to the clientReceive() call below the arbitrator already has the buffer.
@@ -53,54 +51,63 @@ void ArbitratedClientManager::performClientRequest(RequestContext &request)
         if (nestingDetection)
         {
             request.getCodec()->updateStatus(kErpcStatus_NestedCallFailure);
+            return;
         }
 #endif
-        if (request.getCodec()->isStatusOk() == true)
+        token = m_arbitrator->prepareClientReceive(request);
+        if (!token)
         {
-            token = m_arbitrator->prepareClientReceive(request);
-            if (!token)
-            {
-                request.getCodec()->updateStatus(kErpcStatus_Fail);
-            }
+            request.getCodec()->updateStatus(kErpcStatus_Fail);
+            return;
         }
     }
 
+    erpc_status_t err;
+
 #if ERPC_MESSAGE_LOGGING
-    if (request.getCodec()->isStatusOk() == true)
+    err = logMessage(request.getCodec()->getBuffer());
+    if (err)
     {
-        err = logMessage(request.getCodec()->getBuffer());
         request.getCodec()->updateStatus(err);
+        return;
     }
 #endif
 
     // Send the request.
-    if (request.getCodec()->isStatusOk() == true)
+    err = m_arbitrator->send(request.getCodec()->getBuffer());
+    if (err)
     {
-        err = m_arbitrator->send(request.getCodec()->getBuffer());
         request.getCodec()->updateStatus(err);
+        return;
     }
 
     if (!request.isOneway())
     {
-        if (request.getCodec()->isStatusOk() == true)
+        // Complete the receive through the arbitrator.
+        err = m_arbitrator->clientReceive(token);
+        if (err)
         {
-            // Complete the receive through the arbitrator.
-            err = m_arbitrator->clientReceive(token);
             request.getCodec()->updateStatus(err);
+            return;
         }
 
 #if ERPC_MESSAGE_LOGGING
-        if (request.getCodec()->isStatusOk() == true)
+        err = logMessage(request.getCodec()->getBuffer());
+        if (err)
         {
-            err = logMessage(request.getCodec()->getBuffer());
             request.getCodec()->updateStatus(err);
+            return;
         }
 #endif
 
-        if (request.getCodec()->isStatusOk() == true)
+        // Check the reply.
+        err = verifyReply(request);
+        if (err)
         {
-            // Check the reply.
-            verifyReply(request);
+            request.getCodec()->updateStatus(err);
+            return;
         }
     }
+
+    return;
 }
