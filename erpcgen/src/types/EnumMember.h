@@ -37,7 +37,6 @@ public:
     EnumMember(const Token &tok, uint32_t value)
     : Symbol(kEnumMemberSymbol, tok)
     , m_value(value)
-    , m_valueSet(true)
     {
     }
 
@@ -51,7 +50,6 @@ public:
     EnumMember(const Token &tok)
     : Symbol(kEnumMemberSymbol, tok)
     , m_value(-1)
-    , m_valueSet(false)
     {
     }
 
@@ -60,10 +58,7 @@ public:
      *
      * @param[in] value Value of enum member.
      */
-    void setValue(IntegerValue value) {
-        m_value = value;
-        m_valueSet = true;
-    }
+    void setValue(IntegerValue value) { m_value = value; }
 
     /*!
      * @brief This function returns enum member value.
@@ -78,7 +73,7 @@ public:
      * @retval true When enum member has set value.
      * @retval false When enum member has not set value.
      */
-    bool hasValue() const { return m_valueSet; }
+    bool hasValue() const { return -1 != (int32_t)m_value.getValue(); }
 
     /*!
      * @brief This function returns description about the enum member.
@@ -98,7 +93,6 @@ public:
 
 protected:
     IntegerValue m_value; /*!< Integer value of enum member. */
-    bool m_valueSet;
 };
 
 } // namespace erpcgen
