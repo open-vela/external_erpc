@@ -37,7 +37,7 @@ public:
     virtual void dispose(MessageBuffer *buf)
     {
         assert(buf);
-        if (buf->get() != NULL)
+        if (buf->get())
         {
             delete[] buf->get();
         }

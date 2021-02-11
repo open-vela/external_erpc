@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2019, Embedded Planet, Inc
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * For supporting transports and examples see:
@@ -80,7 +79,7 @@ void Thread::start(void *arg)
     // which will scan the linked list.
     mbed::CriticalSectionLock::enable();
 
-    if (s_first != NULL)
+    if (s_first)
     {
         m_next = s_first;
     }
@@ -104,7 +103,7 @@ Thread *Thread::getCurrentThread()
     // Walk the threads list to find the Thread object for the current task.
     mbed::CriticalSectionLock::enable();
     Thread *it = s_first;
-    while (it != NULL)
+    while (it)
     {
         if (it->getThreadId() == currentThreadId)
         {
@@ -123,7 +122,7 @@ void Thread::sleep(uint32_t usecs)
 
 void Thread::threadEntryPoint(void)
 {
-    if (m_entry != NULL)
+    if (m_entry)
     {
         m_entry(m_arg);
     }
@@ -139,7 +138,7 @@ void Thread::threadEntryPointStub(void *arg)
     mbed::CriticalSectionLock::enable();
     Thread *it = s_first;
     Thread *prev = NULL;
-    while (it != NULL)
+    while (it)
     {
         if (it == _this)
         {
@@ -147,12 +146,9 @@ void Thread::threadEntryPointStub(void *arg)
             {
                 s_first = _this->m_next;
             }
-            else
+            else if (prev)
             {
-                if (prev != NULL)
-                {
-                    prev->m_next = _this->m_next;
-                }
+                prev->m_next = _this->m_next;
             }
             _this->m_next = NULL;
 
@@ -219,7 +215,14 @@ void Semaphore::put(void)
 bool Semaphore::get(uint32_t timeout)
 {
     m_count = m_sem->wait(timeout);
-    return (m_count < 0);
+    if (m_count < 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 int Semaphore::getCount(void) const

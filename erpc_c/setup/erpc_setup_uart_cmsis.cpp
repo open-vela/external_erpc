@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -26,17 +25,10 @@ static ManuallyConstructed<UartTransport> s_transport;
 
 erpc_transport_t erpc_transport_cmsis_uart_init(void *uartDrv)
 {
-    erpc_transport_t transport;
-
     s_transport.construct((ARM_DRIVER_USART *)uartDrv);
     if (s_transport->init() == kErpcStatus_Success)
     {
-        transport = reinterpret_cast<erpc_transport_t>(s_transport.get());
+        return reinterpret_cast<erpc_transport_t>(s_transport.get());
     }
-    else
-    {
-        transport = NULL;
-    }
-
-    return transport;
+    return NULL;
 }

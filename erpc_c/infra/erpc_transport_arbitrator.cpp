@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -53,23 +52,16 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 {
     assert(m_sharedTransport && "shared transport is not set");
 
-    erpc_status_t err;
-    message_type_t msgType;
-    uint32_t service;
-    uint32_t requestNumber;
-    uint32_t sequence;
-    PendingClientInfo *client;
-
     while (true)
     {
         // Receive a message.
-        err = m_sharedTransport->receive(message);
-        if (err != kErpcStatus_Success)
+        erpc_status_t err = m_sharedTransport->receive(message);
+        if (err)
         {
             // if we timeout, we must unblock all pending client(s)
             if (err == kErpcStatus_Timeout)
             {
-                client = m_clientList;
+                PendingClientInfo *client = m_clientList;
                 for (; client; client = client->m_next)
                 {
                     if (client->m_isValid)
@@ -78,23 +70,26 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
                     }
                 }
             }
-            break;
+            return err;
         }
-
         m_codec->setBuffer(*message);
 
         // Parse the message header.
+        message_type_t msgType;
+        uint32_t service;
+        uint32_t requestNumber;
+        uint32_t sequence;
         m_codec->startReadMessage(&msgType, &service, &requestNumber, &sequence);
         err = m_codec->getStatus();
-        if (err != kErpcStatus_Success)
+        if (err)
         {
             continue;
         }
 
         // If this message is an invocation, return it to the calling server.
-        if ((msgType == kInvocationMessage) || (msgType == kOnewayMessage))
+        if (msgType == kInvocationMessage || msgType == kOnewayMessage)
         {
-            break;
+            return kErpcStatus_Success;
         }
 
         // Just ignore messages we don't know what to do with.
@@ -104,10 +99,10 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
         }
 
         // Check if there is a client waiting for this message.
-        client = m_clientList;
+        PendingClientInfo *client = m_clientList;
         for (; client; client = client->m_next)
         {
-            if (client->m_isValid && (sequence == client->m_request->getSequence()))
+            if (client->m_isValid && sequence == client->m_request->getSequence())
             {
                 // Swap the received message buffer with the client's message buffer.
                 client->m_request->getCodec()->getBuffer()->swap(message);
@@ -122,12 +117,10 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
         // If received answer is not for postponed client, it can be for nested server call.
         if (client == NULL)
         {
-            break;
+            return kErpcStatus_Success;
         }
 #endif
     }
-
-    return err;
 }
 
 erpc_status_t TransportArbitrator::send(MessageBuffer *message)
@@ -149,7 +142,7 @@ TransportArbitrator::client_token_t TransportArbitrator::prepareClientReceive(Re
 
 erpc_status_t TransportArbitrator::clientReceive(client_token_t token)
 {
-    assert((token != 0) && "invalid client token");
+    assert(token != 0 && "invalid client token");
 
     // Convert token to pointer to info struct for this client receive request.
     PendingClientInfo *info = reinterpret_cast<PendingClientInfo *>(token);
@@ -195,7 +188,6 @@ TransportArbitrator::PendingClientInfo *TransportArbitrator::addPendingClient(vo
 void TransportArbitrator::removePendingClient(PendingClientInfo *info)
 {
     Mutex::Guard lock(m_clientListMutex);
-    PendingClientInfo *node;
 
     // Clear fields.
     info->m_request = NULL;
@@ -208,8 +200,8 @@ void TransportArbitrator::removePendingClient(PendingClientInfo *info)
     }
     else
     {
-        node = m_clientList;
-        while (node != NULL)
+        PendingClientInfo *node = m_clientList;
+        while (node)
         {
             if (node->m_next == info)
             {
@@ -228,11 +220,9 @@ void TransportArbitrator::removePendingClient(PendingClientInfo *info)
 void TransportArbitrator::freeClientList(PendingClientInfo *list)
 {
     PendingClientInfo *info = list;
-    PendingClientInfo *temp;
-
-    while (info != NULL)
+    while (info)
     {
-        temp = info;
+        PendingClientInfo *temp = info;
         info = info->m_next;
         delete temp;
     }
