@@ -151,9 +151,9 @@ extern ClientManager *g_client;
 
 {%  if empty(fn.returnValue.errorReturnValue) == false && fn.returnValue.isNullReturnType == false %}
 
-    if (err != kErpcStatus_Success)
+    if (err)
     {
-        result = {$fn.returnValue.errorReturnValue};
+        return {$fn.returnValue.errorReturnValue};
     }
 {%  endif %}
 {% endif -- generateErrorChecks %}
