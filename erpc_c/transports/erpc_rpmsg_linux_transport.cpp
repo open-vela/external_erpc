@@ -1,6 +1,5 @@
 /*
  * Copyright 2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -31,42 +30,39 @@ erpc_status_t RPMsgLinuxTransport::init(void)
 {
     assert(m_endPoint != NULL);
 
-    return (m_endPoint->init()) ? kErpcStatus_Fail : kErpcStatus_Success;
+    if (!m_endPoint->init())
+    {
+        return kErpcStatus_Success;
+    }
+    else
+    {
+        return kErpcStatus_Fail;
+    }
 }
 
 erpc_status_t RPMsgLinuxTransport::send(MessageBuffer *message)
 {
+
     int retval;
-
     retval = m_endPoint->send(message->get(), m_remote, message->getUsed());
-
-    return (retval > 0) ? kErpcStatus_Success : kErpcStatus_Fail;
+    if (retval > 0)
+        return kErpcStatus_Success;
+    else
+        return kErpcStatus_Fail;
 }
 erpc_status_t RPMsgLinuxTransport::receive(MessageBuffer *message)
 {
     int32_t ret;
-    erpc_status_t err;
 
     while (true)
     {
         ret = m_endPoint->receive(message->get(), message->getLength());
-        if (ret == 0)
-        {
-            usleep(1); // 1us sleep
-        }
-        else
-        {
-            if (ret > 0)
-            {
-                err = kErpcStatus_Success;
-            }
-            else
-            {
-                err = kErpcStatus_Fail;
-            }
-            break;
-        }
-    }
 
-    return ret;
+        if (ret > 0)
+            return kErpcStatus_Success;
+        if (ret < 0)
+            return kErpcStatus_Fail;
+        else
+            usleep(1); // 1us sleep
+    }
 }

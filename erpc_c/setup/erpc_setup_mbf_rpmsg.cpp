@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -66,7 +65,7 @@ public:
     {
         assert(buf);
         void *tmp = (void *)buf->get();
-        if (tmp != NULL)
+        if (tmp)
         {
             int32_t ret;
             ret = rpmsg_lite_release_rx_buffer(m_rpmsg, tmp);
@@ -79,20 +78,16 @@ public:
 
     virtual erpc_status_t prepareServerBufferForSend(MessageBuffer *message)
     {
-        erpc_status_t status;
-
         dispose(message);
         *message = create();
         if (message->get() != NULL)
         {
-            status = kErpcStatus_Success;
+            return kErpcStatus_Success;
         }
         else
         {
-            status = kErpcStatus_MemoryError;
+            return kErpcStatus_MemoryError;
         }
-
-        return status;
     }
 
     virtual bool createServerBuffer(void) { return false; }
