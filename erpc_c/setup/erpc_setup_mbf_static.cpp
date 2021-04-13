@@ -123,7 +123,7 @@ protected:
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED(StaticMessageBufferFactory, s_msgFactory);
+static ManuallyConstructed<StaticMessageBufferFactory> s_msgFactory;
 
 erpc_mbf_t erpc_mbf_static_init(void)
 {

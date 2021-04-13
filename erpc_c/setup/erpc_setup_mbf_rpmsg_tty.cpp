@@ -109,7 +109,7 @@ protected:
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED(RPMsgTTYMessageBufferFactory, s_msgFactory);
+static ManuallyConstructed<RPMsgTTYMessageBufferFactory> s_msgFactory;
 
 erpc_mbf_t erpc_mbf_rpmsg_tty_init(erpc_transport_t transport)
 {
