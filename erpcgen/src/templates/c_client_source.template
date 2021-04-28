@@ -5,9 +5,7 @@
 {$commonHeader()}
 
 #include "erpc_client_manager.h"
-#if ERPC_ALLOCATION_POLICY == ERPC_DYNAMIC_POLICY
 #include "erpc_port.h"
-#endif
 #include "{$codecHeader}"
 extern "C"
 {
