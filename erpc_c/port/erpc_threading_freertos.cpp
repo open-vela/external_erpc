@@ -38,8 +38,7 @@ Thread::Thread(const char *name)
 {
 }
 
-Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name,
-               thread_stack_pointer stackPtr)
+Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
 : m_name(name)
 , m_entry(entry)
 , m_arg(0)
@@ -52,18 +51,16 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
 
 Thread::~Thread(void) {}
 
-void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize, thread_stack_pointer stackPtr)
+void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize)
 {
     m_entry = entry;
     m_stackSize = stackSize;
     m_priority = priority;
-    m_stackPtr = stackPtr;
 }
 
 void Thread::start(void *arg)
 {
     m_arg = arg;
-    bool taskCreated = false;
 
     // Enter a critical section to disable preemptive scheduling until we add the newly
     // created thread to the linked list. This prevents a race condition if the new thread is
@@ -71,31 +68,9 @@ void Thread::start(void *arg)
     // which will scan the linked list.
     taskENTER_CRITICAL();
 
-#if ERPC_ALLOCATION_POLICY == ERPC_STATIC_POLICY
-    if (m_stackPtr != NULL)
-    {
-        m_task =
-            xTaskCreateStatic(threadEntryPointStub, (m_name ? m_name : "task"),
+    if (pdPASS == xTaskCreate(threadEntryPointStub, (m_name ? m_name : "task"),
                               ((m_stackSize + sizeof(uint32_t) - 1) / sizeof(uint32_t)), // Round up number of words.
-                              this, m_priority, m_stackPtr, &m_staticTask);
-        taskCreated = true;
-    }
-#endif
-
-#if configSUPPORT_DYNAMIC_ALLOCATION
-    if (m_stackPtr == NULL)
-    {
-        if (pdPASS ==
-            xTaskCreate(threadEntryPointStub, (m_name ? m_name : "task"),
-                        ((m_stackSize + sizeof(uint32_t) - 1) / sizeof(uint32_t)), // Round up number of words.
-                        this, m_priority, &m_task))
-        {
-            taskCreated = true;
-        }
-    }
-#endif
-
-    if (taskCreated)
+                              this, m_priority, &m_task))
     {
         // Link in this thread to the list.
         if (NULL != s_first)
@@ -205,13 +180,7 @@ void Thread::threadEntryPointStub(void *arg)
 Mutex::Mutex(void)
 : m_mutex(0)
 {
-#if ERPC_ALLOCATION_POLICY == ERPC_STATIC_POLICY
-    m_mutex = xSemaphoreCreateRecursiveMutexStatic(&m_staticQueue);
-#elif configSUPPORT_DYNAMIC_ALLOCATION
     m_mutex = xSemaphoreCreateRecursiveMutex();
-#else
-#error "Allocation method didn't match"
-#endif
 }
 
 Mutex::~Mutex(void)
@@ -239,13 +208,7 @@ Semaphore::Semaphore(int count)
 : m_sem(0)
 {
     // Set max count to highest signed int.
-#if ERPC_ALLOCATION_POLICY == ERPC_STATIC_POLICY
-    m_sem = xSemaphoreCreateCountingStatic(0x7fffffff, count, &m_staticQueue);
-#elif configSUPPORT_DYNAMIC_ALLOCATION
     m_sem = xSemaphoreCreateCounting(0x7fffffff, count);
-#else
-#error "Allocation method didn't match"
-#endif
 }
 
 Semaphore::~Semaphore(void)
