@@ -9,7 +9,7 @@
  */
 #include "erpc_transport_arbitrator.h"
 
-#include "erpc_manually_constructed.h"
+#include "erpc_config_internal.h"
 
 #include <cassert>
 #include <cstdio>
@@ -24,9 +24,6 @@ using namespace erpc;
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-
-ERPC_MANUALLY_CONSTRUCTED_ARRAY_STATIC(TransportArbitrator::PendingClientInfo, s_pendingClientInfoArray,
-                                       ERPC_CLIENTS_THREADS_AMOUNT);
 
 TransportArbitrator::TransportArbitrator(void)
 : Transport()
@@ -165,9 +162,6 @@ erpc_status_t TransportArbitrator::clientReceive(client_token_t token)
     return kErpcStatus_Success;
 }
 
-TransportArbitrator::PendingClientInfo *TransportArbitrator::createPendingClient(void){ ERPC_CREATE_NEW_OBJECT(
-    TransportArbitrator::PendingClientInfo, s_pendingClientInfoArray, ERPC_CLIENTS_THREADS_AMOUNT) }
-
 TransportArbitrator::PendingClientInfo *TransportArbitrator::addPendingClient(void)
 {
     Mutex::Guard lock(m_clientListMutex);
@@ -176,7 +170,7 @@ TransportArbitrator::PendingClientInfo *TransportArbitrator::addPendingClient(vo
     PendingClientInfo *info = NULL;
     if (!m_clientFreeList)
     {
-        info = createPendingClient();
+        info = new PendingClientInfo();
     }
     else
     {
@@ -240,7 +234,7 @@ void TransportArbitrator::freeClientList(PendingClientInfo *list)
     {
         temp = info;
         info = info->m_next;
-        ERPC_DESTROY_OBJECT(temp, s_pendingClientInfoArray, ERPC_CLIENTS_THREADS_AMOUNT)
+        delete temp;
     }
 }
 
