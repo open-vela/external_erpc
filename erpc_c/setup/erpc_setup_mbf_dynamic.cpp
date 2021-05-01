@@ -48,7 +48,7 @@ public:
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED(DynamicMessageBufferFactory, s_msgFactory);
+static ManuallyConstructed<DynamicMessageBufferFactory> s_msgFactory;
 
 erpc_mbf_t erpc_mbf_dynamic_init(void)
 {
