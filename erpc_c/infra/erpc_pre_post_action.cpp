@@ -1,17 +1,15 @@
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020 NXP
  * Copyright 2020 ACRIOS Systems s.r.o.
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "erpc_config_internal.h"
-#if ERPC_PRE_POST_ACTION
-
 #include "erpc_pre_post_action.h"
+
+#include "erpc_config_internal.h"
 #if ERPC_PRE_POST_ACTION_DEFAULT
 #include "erpc_setup_extensions.h"
 #endif
@@ -25,7 +23,7 @@ using namespace std;
 
 void PrePostAction::addPreCB(pre_post_action_cb preCB)
 {
-    if (preCB != NULL)
+    if (preCB)
     {
         m_preCB = preCB;
     }
@@ -39,7 +37,7 @@ void PrePostAction::addPreCB(pre_post_action_cb preCB)
 
 void PrePostAction::addPostCB(pre_post_action_cb postCB)
 {
-    if (postCB != NULL)
+    if (postCB)
     {
         m_postCB = postCB;
     }
@@ -50,4 +48,3 @@ void PrePostAction::addPostCB(pre_post_action_cb postCB)
     }
 #endif
 }
-#endif /* ERPC_PRE_POST_ACTION */

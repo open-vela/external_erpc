@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -18,7 +17,7 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint8_t BasicCodec::kBasicCodecVersion = 1;
+const uint32_t BasicCodec::kBasicCodecVersion = 1;
 
 void BasicCodec::startWriteMessage(message_type_t type, uint32_t service, uint32_t request, uint32_t sequence)
 {
@@ -48,7 +47,6 @@ void BasicCodec::write(bool value)
 {
     // Make sure the bool is a single byte.
     uint8_t v = value;
-
     writeData(&v, sizeof(v));
 }
 
@@ -105,7 +103,6 @@ void BasicCodec::write(double value)
 void BasicCodec::writePtr(uintptr_t value)
 {
     uint8_t ptrSize = sizeof(value);
-
     write(ptrSize);
 
     writeData(&value, ptrSize);
@@ -144,19 +141,16 @@ void BasicCodec::writeNullFlag(bool isNull)
 
 void BasicCodec::writeCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, funPtr callback)
 {
-    uint8_t i;
-
-    assert(callbacksCount > 1U);
-
+    assert(callbacksCount > 1);
     // callbacks = callbacks table
-    for (i = 0; i < callbacksCount; i++)
+    for (uint8_t i = 0; i < callbacksCount; i++)
     {
         if (callbacks[i] == callback)
         {
             write(i);
             break;
         }
-        if ((i + 1U) == callbacksCount)
+        if (i + 1 == callbacksCount)
         {
             updateStatus(kErpcStatus_UnknownCallback);
         }
@@ -176,19 +170,18 @@ void BasicCodec::writeCallback(funPtr callback1, funPtr callback2)
 void BasicCodec::startReadMessage(message_type_t *type, uint32_t *service, uint32_t *request, uint32_t *sequence)
 {
     uint32_t header;
-
     read(&header);
 
-    if (((header >> 24) & 0xffU) != kBasicCodecVersion)
+    if (((header >> 24) & 0xff) != kBasicCodecVersion)
     {
         updateStatus(kErpcStatus_InvalidMessageVersion);
     }
 
     if (!m_status)
     {
-        *service = ((header >> 16) & 0xffU);
-        *request = ((header >> 8) & 0xffU);
-        *type = static_cast<message_type_t>(header & 0xffU);
+        *service = ((header >> 16) & 0xff);
+        *request = ((header >> 8) & 0xff);
+        *type = static_cast<message_type_t>(header & 0xff);
 
         read(sequence);
     }
@@ -212,7 +205,6 @@ void BasicCodec::readData(void *value, uint32_t length)
 void BasicCodec::read(bool *value)
 {
     uint8_t v = 0;
-
     readData(&v, sizeof(v));
     if (!m_status)
     {
@@ -273,7 +265,6 @@ void BasicCodec::read(double *value)
 void BasicCodec::readPtr(uintptr_t *value)
 {
     uint8_t ptrSize;
-
     read(&ptrSize);
 
     if (ptrSize > sizeof(*value))
@@ -320,8 +311,7 @@ void BasicCodec::startReadList(uint32_t *length)
 {
     // Read list length as u32.
     read(length);
-
-    if (!isStatusOk())
+    if (m_status)
     {
         *length = 0;
     }
@@ -336,23 +326,20 @@ void BasicCodec::startReadUnion(int32_t *discriminator)
 void BasicCodec::readNullFlag(bool *isNull)
 {
     uint8_t flag;
-
     read(&flag);
-    if (isStatusOk())
+    if (!m_status)
     {
-        *isNull = (flag == (uint8_t)kIsNull);
+        *isNull = (flag == kIsNull);
     }
 }
 
 void BasicCodec::readCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, funPtr *callback)
 {
-    uint8_t _tmp_local;
-
-    assert(callbacksCount > 1U);
-
+    assert(callbacksCount > 1);
     // callbacks = callbacks table
+    uint8_t _tmp_local;
     read(&_tmp_local);
-    if (isStatusOk())
+    if (!m_status)
     {
         if (_tmp_local < callbacksCount)
         {

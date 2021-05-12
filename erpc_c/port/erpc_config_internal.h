@@ -47,15 +47,6 @@
     #endif
 #endif
 
-// Safely detect tx_api.h.
-#define ERPC_HAS_THREADX_API_H (0)
-#if defined(__has_include)
-    #if __has_include("tx_api.h")
-        #undef ERPC_HAS_THREADX_API_H
-        #define ERPC_HAS_THREADX_API_H (1)
-    #endif
-#endif
-
 // Detect threading model if not already set.
 #if !defined(ERPC_THREADS)
     #if ERPC_HAS_POSIX
@@ -66,8 +57,6 @@
         #define ERPC_THREADS (ERPC_THREADS_FREERTOS)
     #elif ERPC_HAS_WIN32
         #define ERPC_THREADS (ERPC_THREADS_WIN32)
-    #elif ERPC_HAS_THREADX_API_H
-        #define ERPC_THREADS (ERPC_THREADS_THREADX)
     #else
         // Otherwise default to no threads.
         #define ERPC_THREADS (ERPC_THREADS_NONE)
@@ -81,13 +70,13 @@
 // Set default buffer size.
 #if !defined(ERPC_DEFAULT_BUFFER_SIZE)
     //! @brief Size of buffers allocated by BasicMessageBufferFactory in setup functions.
-    #define ERPC_DEFAULT_BUFFER_SIZE (256U)
+    #define ERPC_DEFAULT_BUFFER_SIZE (256)
 #endif
 
 // Set default buffers count.
 #if !defined(ERPC_DEFAULT_BUFFERS_COUNT)
     //! @brief Count of buffers allocated by StaticMessageBufferFactory.
-    #define ERPC_DEFAULT_BUFFERS_COUNT (2U)
+    #define ERPC_DEFAULT_BUFFERS_COUNT (2)
 #endif
 
 // Disable/enable noexcept.
