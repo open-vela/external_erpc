@@ -1,6 +1,5 @@
 /*
  * Copyright 2020 (c) Sierra Wireless
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -25,19 +24,12 @@ static ManuallyConstructed<TCPTransport> s_transport;
 
 erpc_transport_t erpc_transport_tcp_init(const char *host, uint16_t port, bool isServer)
 {
-    erpc_transport_t transport;
-
     s_transport.construct(host, port, isServer);
     if (kErpcStatus_Success == s_transport->open())
     {
-        transport = reinterpret_cast<erpc_transport_t>(s_transport.get());
+        return reinterpret_cast<erpc_transport_t>(s_transport.get());
     }
-    else
-    {
-        transport = NULL;
-    }
-
-    return transport;
+    return NULL;
 }
 
 void erpc_transport_tcp_close(void)

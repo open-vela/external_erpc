@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -28,7 +27,7 @@ static UartTransport *s_uart_instance = NULL;
 
 UartTransport::UartTransport(ARM_DRIVER_USART *uartDrv)
 : m_uartDrv(uartDrv)
-#if !ERPC_THREADS_IS(NONE)
+#if ERPC_THREADS
 , m_rxSemaphore()
 , m_txSemaphore()
 #endif
@@ -43,7 +42,7 @@ UartTransport::~UartTransport(void)
 
 void UartTransport::tx_cb(void)
 {
-#if !ERPC_THREADS_IS(NONE)
+#if ERPC_THREADS
     m_txSemaphore.putFromISR();
 #else
     s_isTransferSendCompleted = true;
@@ -52,7 +51,7 @@ void UartTransport::tx_cb(void)
 
 void UartTransport::rx_cb(void)
 {
-#if !ERPC_THREADS_IS(NONE)
+#if ERPC_THREADS
     m_rxSemaphore.putFromISR();
 #else
     s_isTransferReceiveCompleted = true;
@@ -60,7 +59,7 @@ void UartTransport::rx_cb(void)
 }
 
 /* Transfer callback */
-static void TransferCallback(uint32_t event)
+void TransferCallback(uint32_t event)
 {
     UartTransport *transport = s_uart_instance;
 
@@ -77,9 +76,7 @@ static void TransferCallback(uint32_t event)
 
 erpc_status_t UartTransport::init(void)
 {
-    erpc_status_t erpcStatus = kErpcStatus_InitFailed;
     int32_t status = (*m_uartDrv).Initialize(TransferCallback);
-
     if (status == ARM_DRIVER_OK)
     {
         status = (*m_uartDrv).PowerControl(ARM_POWER_FULL); /* Enable Receiver and Transmitter lines */
@@ -91,57 +88,53 @@ erpc_status_t UartTransport::init(void)
                 status = m_uartDrv->Control(ARM_USART_CONTROL_RX, 1);
                 if (status == ARM_DRIVER_OK)
                 {
-                    erpcStatus = kErpcStatus_Success;
+                    return kErpcStatus_Success;
                 }
             }
         }
     }
 
-    return erpcStatus;
+    return kErpcStatus_InitFailed;
 }
 
 erpc_status_t UartTransport::underlyingReceive(uint8_t *data, uint32_t size)
 {
-    erpc_status_t erpcStatus = kErpcStatus_ReceiveFailed;
-    int32_t status = (*m_uartDrv).Receive(data, size);
-
     s_isTransferReceiveCompleted = false;
 
+    int32_t status = (*m_uartDrv).Receive(data, size);
     if (status == ARM_DRIVER_OK)
     {
 /* wait until the receiving is finished */
-#if !ERPC_THREADS_IS(NONE)
+#if ERPC_THREADS
         m_rxSemaphore.get();
 #else
         while (!s_isTransferReceiveCompleted)
         {
         }
 #endif
-        erpcStatus = kErpcStatus_Success;
+        return kErpcStatus_Success;
     }
 
-    return erpcStatus;
+    return kErpcStatus_ReceiveFailed;
 }
 
 erpc_status_t UartTransport::underlyingSend(const uint8_t *data, uint32_t size)
 {
-    erpc_status_t erpcStatus = kErpcStatus_SendFailed;
-    int32_t status = (*m_uartDrv).Send(data, size);
-
     s_isTransferSendCompleted = false;
 
+    int32_t status = (*m_uartDrv).Send(data, size);
     if (status == ARM_DRIVER_OK)
     {
 /* wait until the sending is finished */
-#if !ERPC_THREADS_IS(NONE)
+#if ERPC_THREADS
         m_txSemaphore.get();
 #else
         while (!s_isTransferSendCompleted)
         {
         }
 #endif
-        erpcStatus = kErpcStatus_Success;
+        return kErpcStatus_Success;
     }
 
-    return erpcStatus;
+    return kErpcStatus_SendFailed;
 }

@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -41,173 +40,184 @@ RequestContext ClientManager::createRequest(bool isOneway)
 
 void ClientManager::performRequest(RequestContext &request)
 {
-    bool performRequest;
-
     // Check the codec status
-    performRequest = request.getCodec()->isStatusOk();
+    if (kErpcStatus_Success != (request.getCodec()->getStatus()))
+    {
+        // Do not perform the request
+        return;
+    }
 
 #if ERPC_NESTED_CALLS
-    if (performRequest)
+    assert(m_serverThreadId && "server thread id was not set");
+    if (Thread::getCurrentThreadId() == m_serverThreadId)
     {
-        assert(m_serverThreadId && "server thread id was not set");
-        if (Thread::getCurrentThreadId() == m_serverThreadId)
-        {
-            performNestedClientRequest(request);
-            performRequest = false;
-        }
+        return performNestedClientRequest(request);
     }
 #endif
-    if (performRequest)
-    {
-        performClientRequest(request);
-    }
+    return performClientRequest(request);
 }
 
 void ClientManager::performClientRequest(RequestContext &request)
 {
-    erpc_status_t err;
-
 #if ERPC_NESTED_CALLS_DETECTION
     if (!request.isOneway() && nestingDetection)
     {
         request.getCodec()->updateStatus(kErpcStatus_NestedCallFailure);
+        return;
     }
 #endif
 
-#if ERPC_MESSAGE_LOGGING
-    if (request.getCodec()->isStatusOk() == true)
-    {
-        err = logMessage(request.getCodec()->getBuffer());
-        request.getCodec()->updateStatus(err);
-    }
-#endif
-
-    // Send invocation request to server.
-    if (request.getCodec()->isStatusOk() == true)
-    {
-        err = m_transport->send(request.getCodec()->getBuffer());
-        request.getCodec()->updateStatus(err);
-    }
-
-    // If the request is oneway, then there is nothing more to do.
-    if (!request.isOneway())
-    {
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            // Receive reply.
-            err = m_transport->receive(request.getCodec()->getBuffer());
-            request.getCodec()->updateStatus(err);
-        }
-
-#if ERPC_MESSAGE_LOGGING
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            err = logMessage(request.getCodec()->getBuffer());
-            request.getCodec()->updateStatus(err);
-        }
-#endif
-
-        // Check the reply.
-        if (request.getCodec()->isStatusOk() == true)
-        {
-            verifyReply(request);
-        }
-    }
-}
-
-#if ERPC_NESTED_CALLS
-void ClientManager::performNestedClientRequest(RequestContext &request)
-{
     erpc_status_t err;
 
-    assert(m_transport && "transport/arbitrator not set");
-
 #if ERPC_MESSAGE_LOGGING
-    if (request.getCodec()->isStatusOk() == true)
+    err = logMessage(request.getCodec()->getBuffer());
+    if (err)
     {
-        err = logMessage(request.getCodec()->getBuffer());
         request.getCodec()->updateStatus(err);
+        return;
     }
 #endif
 
     // Send invocation request to server.
-    if (request.getCodec()->isStatusOk() == true)
+    err = m_transport->send(request.getCodec()->getBuffer());
+    if (err)
     {
-        err = m_transport->send(request.getCodec()->getBuffer());
         request.getCodec()->updateStatus(err);
+        return;
     }
 
     // If the request is oneway, then there is nothing more to do.
     if (!request.isOneway())
     {
         // Receive reply.
-        if (request.getCodec()->isStatusOk() == true)
+        err = m_transport->receive(request.getCodec()->getBuffer());
+        if (err)
         {
-            assert(m_server && "server for nesting calls was not set");
-            err = m_server->run(request);
             request.getCodec()->updateStatus(err);
+            return;
         }
 
 #if ERPC_MESSAGE_LOGGING
-        if (request.getCodec()->isStatusOk() == true)
+        err = logMessage(request.getCodec()->getBuffer());
+        if (err)
         {
-            err = logMessage(request.getCodec()->getBuffer());
             request.getCodec()->updateStatus(err);
+            return;
         }
 #endif
 
         // Check the reply.
-        if (request.getCodec()->isStatusOk() == true)
+        err = verifyReply(request);
+        if (err)
         {
-            verifyReply(request);
+            request.getCodec()->updateStatus(err);
+            return;
+        }
+    }
+
+    return;
+}
+
+#if ERPC_NESTED_CALLS
+void ClientManager::performNestedClientRequest(RequestContext &request)
+{
+    assert(m_transport && "transport/arbitrator not set");
+
+    erpc_status_t err;
+
+#if ERPC_MESSAGE_LOGGING
+    err = logMessage(request.getCodec()->getBuffer());
+    if (err)
+    {
+        request.getCodec()->updateStatus(err);
+        return;
+    }
+#endif
+
+    // Send invocation request to server.
+    err = m_transport->send(request.getCodec()->getBuffer());
+    if (err)
+    {
+        request.getCodec()->updateStatus(err);
+        return;
+    }
+
+    // If the request is oneway, then there is nothing more to do.
+    if (!request.isOneway())
+    {
+        // Receive reply.
+        assert(m_server && "server for nesting calls was not set");
+        err = m_server->run(request);
+        if (err)
+        {
+            request.getCodec()->updateStatus(err);
+            return;
+        }
+
+#if ERPC_MESSAGE_LOGGING
+        err = logMessage(request.getCodec()->getBuffer());
+        if (err)
+        {
+            request.getCodec()->updateStatus(err);
+            return;
+        }
+#endif
+
+        // Check the reply.
+        err = verifyReply(request);
+        if (err)
+        {
+            request.getCodec()->updateStatus(err);
+            return;
         }
     }
 }
 #endif
 
-void ClientManager::verifyReply(RequestContext &request)
+erpc_status_t ClientManager::verifyReply(RequestContext &request)
 {
-    message_type_t msgType;
-    uint32_t service;
-    uint32_t requestNumber;
-    uint32_t sequence;
-
     // Some transport layers change the request's message buffer pointer (for things like zero
     // copy support), so inCodec must be reset to work with correct buffer.
     request.getCodec()->reset();
 
     // Extract the reply header.
+    message_type_t msgType;
+    uint32_t service;
+    uint32_t requestNumber;
+    uint32_t sequence;
     request.getCodec()->startReadMessage(&msgType, &service, &requestNumber, &sequence);
-
-    if (request.getCodec()->isStatusOk() == true)
+    erpc_status_t err = request.getCodec()->getStatus();
+    if (err)
     {
-        // Verify that this is a reply to the request we just sent.
-        if ((msgType != kReplyMessage) || (sequence != request.getSequence()))
-        {
-            request.getCodec()->updateStatus(kErpcStatus_ExpectedReply);
-        }
+        return err;
     }
+
+    // Verify that this is a reply to the request we just sent.
+    if (msgType != kReplyMessage || sequence != request.getSequence())
+    {
+        return kErpcStatus_ExpectedReply;
+    }
+
+    return kErpcStatus_Success;
 }
 
 Codec *ClientManager::createBufferAndCodec(void)
 {
     Codec *codec = m_codecFactory->create();
-    MessageBuffer message;
-
-    if (codec != NULL)
+    if (!codec)
     {
-        message = m_messageFactory->create();
-        if (message.get())
-        {
-            codec->setBuffer(message);
-        }
-        else
-        {
-            // Dispose of buffers and codecs.
-            m_codecFactory->dispose(codec);
-            codec = NULL;
-        }
+        return NULL;
     }
+
+    MessageBuffer message = m_messageFactory->create();
+    if (!message.get())
+    {
+        // Dispose of buffers and codecs.
+        m_codecFactory->dispose(codec);
+        return NULL;
+    }
+
+    codec->setBuffer(message);
 
     return codec;
 }

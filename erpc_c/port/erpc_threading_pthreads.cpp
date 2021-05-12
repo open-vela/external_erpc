@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -21,14 +20,9 @@ using namespace erpc;
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
- * @brief Thread object key.
+ * Thread object key.
  */
 pthread_key_t Thread::s_threadObjectKey = 0;
-
-/*!
- * @brief Second to microseconds.
- */
-const uint32_t sToUs = 1000000;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -84,18 +78,16 @@ bool Thread::operator==(Thread &o)
 Thread *Thread::getCurrentThread(void)
 {
     void *value = pthread_getspecific(s_threadObjectKey);
-
     return reinterpret_cast<Thread *>(value);
 }
 
 void Thread::sleep(uint32_t usecs)
 {
-    struct timespec rq;
-    struct timespec actual = { 0, 0 };
-
     // Sleep for the requested number of microseconds.
-    rq.tv_sec = usecs / sToUs;
-    rq.tv_nsec = (usecs % sToUs) * 1000U;
+    struct timespec rq;
+    rq.tv_sec = usecs / 1000000;
+    rq.tv_nsec = (usecs % 1000000) * 1000;
+    struct timespec actual = { 0, 0 };
 
     // Keep sleeping until the requested time elapses even if we get interrupted by a signal.
     while (nanosleep(&rq, &actual) == EINTR)
@@ -112,7 +104,7 @@ void Thread::sleep(uint32_t usecs)
 
 void Thread::threadEntryPoint(void)
 {
-    if (m_entry != NULL)
+    if (m_entry)
     {
         m_entry(m_arg);
     }
@@ -121,8 +113,7 @@ void Thread::threadEntryPoint(void)
 void *Thread::threadEntryPointStub(void *arg)
 {
     Thread *_this = reinterpret_cast<Thread *>(arg);
-
-    if (_this != NULL)
+    if (_this)
     {
         _this->threadEntryPoint();
     }
@@ -186,46 +177,35 @@ void Semaphore::put(void)
 bool Semaphore::get(uint32_t timeout)
 {
     Mutex::Guard guard(m_mutex);
-    bool retVal = true;
     int err;
-
     while (m_count == 0)
     {
         if (timeout == kWaitForever)
         {
             err = pthread_cond_wait(&m_cond, m_mutex.getPtr());
-            if (err != 0)
+            if (err)
             {
-                retVal = false;
-                break;
+                return false;
             }
         }
-        else
+        else if (timeout > 0)
         {
-            if (timeout > 0U)
+            // Create an absolute timeout time.
+            struct timeval tv;
+            gettimeofday(&tv, NULL);
+            struct timespec wait;
+            wait.tv_sec = tv.tv_sec + (timeout / 1000000);
+            wait.tv_nsec = (timeout % 1000000) * 1000;
+            err = pthread_cond_timedwait(&m_cond, m_mutex.getPtr(), &wait);
+            if (err)
             {
-                // Create an absolute timeout time.
-                struct timeval tv;
-                gettimeofday(&tv, NULL);
-                struct timespec wait;
-                wait.tv_sec = tv.tv_sec + (timeout / sToUs);
-                wait.tv_nsec = (timeout % sToUs) * 1000U;
-                err = pthread_cond_timedwait(&m_cond, m_mutex.getPtr(), &wait);
-                if (err != 0)
-                {
-                    retVal = false;
-                    break;
-                }
+                return false;
             }
         }
     }
+    --m_count;
 
-    if (retVal)
-    {
-        --m_count;
-    }
-
-    return retVal;
+    return true;
 }
 
 int Semaphore::getCount(void) const
