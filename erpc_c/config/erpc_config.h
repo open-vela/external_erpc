@@ -29,6 +29,7 @@
 #define ERPC_THREADS_ZEPHYR (3)   //!< ZEPHYR.
 #define ERPC_THREADS_MBED (4)     //!< Mbed OS
 #define ERPC_THREADS_WIN32 (5)    //!< WIN32
+#define ERPC_THREADS_THREADX (6)    //!< THREADX
 
 #define ERPC_NOEXCEPT_DISABLED (0) //!< Disabling noexcept feature.
 #define ERPC_NOEXCEPT_ENABLED (1)  //!<  Enabling noexcept feature.
@@ -71,13 +72,13 @@
 //! Uncomment to change the size of buffers allocated by one of MessageBufferFactory.
 //! (@ref client_setup and @ref server_setup). The default size is set to 256.
 //! For RPMsg transport layer, ERPC_DEFAULT_BUFFER_SIZE must be 2^n - 16.
-//#define ERPC_DEFAULT_BUFFER_SIZE (256)
+//#define ERPC_DEFAULT_BUFFER_SIZE (256U)
 
 //! @def ERPC_DEFAULT_BUFFERS_COUNT
 //!
 //! Uncomment to change the count of buffers allocated by one of statically allocated messages.
 //! Default value is set to 2.
-//#define ERPC_DEFAULT_BUFFERS_COUNT (2)
+//#define ERPC_DEFAULT_BUFFERS_COUNT (2U)
 
 //! @def ERPC_NOEXCEPT
 //!
