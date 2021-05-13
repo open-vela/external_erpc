@@ -1,65 +1,55 @@
 /*
- * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
+/*
+ * Copyright (c) 2021, StarGate, Inc.
  * All rights reserved.
- *
+ * 
+ * Ibrahim ERTURK <ierturk@ieee.org>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "erpc_port.h"
 
-#include <cstdlib>
 #include <new>
 
+extern "C" {
+#include "tx_api.h"
+};
+
 using namespace std;
-
-void *operator new(size_t count) THROW_BADALLOC
+void *operator new(std::size_t count) THROW_BADALLOC
 {
     void *p = erpc_malloc(count);
     return p;
 }
 
-void *operator new(size_t count, const nothrow_t &tag) THROW NOEXCEPT
+void *operator new(std::size_t count, const std::nothrow_t &tag) THROW
 {
     (void)tag;
     void *p = erpc_malloc(count);
     return p;
 }
 
-void *operator new[](size_t count) THROW_BADALLOC
+void *operator new[](std::size_t count) THROW_BADALLOC
 {
     void *p = erpc_malloc(count);
     return p;
 }
 
-void *operator new[](size_t count, const nothrow_t &tag) THROW NOEXCEPT
+void *operator new[](std::size_t count, const std::nothrow_t &tag) THROW
 {
     (void)tag;
     void *p = erpc_malloc(count);
     return p;
 }
 
-void operator delete(void *ptr)THROW NOEXCEPT
+void operator delete(void *ptr)THROW
 {
     erpc_free(ptr);
 }
 
-void operator delete(void *ptr, std::size_t count)THROW NOEXCEPT
+void operator delete[](void *ptr) THROW
 {
-    (void)count;
-    erpc_free(ptr);
-}
-
-void operator delete[](void *ptr) THROW NOEXCEPT
-{
-    erpc_free(ptr);
-}
-
-void operator delete[](void *ptr, std::size_t count) THROW NOEXCEPT
-{
-    (void)count;
     erpc_free(ptr);
 }
 
