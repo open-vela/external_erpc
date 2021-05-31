@@ -1,5 +1,3 @@
-[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/EmbeddedRPC/erpc)
-
 # eRPC
 
 eRPC (Embedded RPC) is an open source Remote Procedure Call (RPC) system for multichip embedded systems and heterogeneous multicore SoCs.
@@ -194,4 +192,4 @@ Repository on Github contains two main branches. __Master__ and __develop__. Cod
 ---
 Copyright 2014-2016 Freescale Semiconductor, Inc.
 
-Copyright 2016-2021 NXP
+Copyright 2016-2020 NXP

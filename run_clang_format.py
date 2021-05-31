@@ -12,27 +12,34 @@ import subprocess
 import sys,os
 
 #Folders to scan
-folders = [
-    "erpc_c",
-    "erpcgen/src",
-    "erpcsniffer/src",
-    "test"]
+folders = []
+folders.append("erpc_c");
+folders.append("erpcgen/src");
+folders.append("erpcsniffer/src");
+folders.append("test");
 
 #Files which will be not formatted
-exceptions = [
-    "test/common/gtest/gtest.h",
-    "test/common/gtest/gtest.cpp",
-    "erpcgen/src/cpptemplate/cpptempl.h",
-    "erpcgen/src/cpptemplate/cpptempl.cpp",
-    "erpcgen/src/cpptemplate/cpptempl_test.cpp"]
+exceptions = []
+exceptions.append("test/common/gtest/gtest.h");
+exceptions.append("test/common/gtest/gtest.cpp");
+exceptions.append("erpcgen/src/cpptemplate/cpptempl.h");
+exceptions.append("erpcgen/src/cpptemplate/cpptempl.cpp");
+exceptions.append("erpcgen/src/cpptemplate/cpptempl_test.cpp");
 
 #For windows use "\\" instead of "/" path separators.
 if os.environ.get('OS','') == 'Windows_NT':
-    folders = [os.path.normpath(folder) for folder in folders]
-    exceptions = [os.path.normpath(e) for e in exceptions]
+    for i, folder in enumerate(folders):
+        folders[i] = os.path.normpath(folder)
+
+    for i, ext in enumerate(exceptions):
+        exceptions[i] = os.path.normpath(ext)
 
 #Files with this extensions will be formatted/
-extensions = [".h", ".hpp", ".c", ".cpp"]
+extensions = []
+extensions.append(".h")
+extensions.append(".hpp")
+extensions.append(".c")
+extensions.append(".cpp")
 
 #processing formatting
 for folder in folders:
@@ -46,5 +53,5 @@ for folder in folders:
                     print("Ignored: ", file)
                 else:
                     print("Formatting: ", file)
-                    subprocess.call(["clang-format", "-i", file])
+                    subprocess.call(["clang-format-10.0", "-i", file])
     print('*****************************************************************************\n')

@@ -70,7 +70,6 @@ SOURCES += 	$(ERPC_C_ROOT)/infra/erpc_arbitrated_client_manager.cpp \
 			$(ERPC_C_ROOT)/setup/erpc_setup_mbf_static.cpp \
 			$(ERPC_C_ROOT)/setup/erpc_server_setup.cpp \
 			$(ERPC_C_ROOT)/setup/erpc_setup_serial.cpp \
-			$(ERPC_C_ROOT)/setup/erpc_setup_tcp.cpp \
 			$(ERPC_C_ROOT)/transports/erpc_inter_thread_buffer_transport.cpp \
 			$(ERPC_C_ROOT)/transports/erpc_serial_transport.cpp \
 			$(ERPC_C_ROOT)/transports/erpc_tcp_transport.cpp
