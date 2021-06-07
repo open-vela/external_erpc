@@ -1,19 +1,17 @@
 /*
- * Copyright 2017 NXP
+ * Copyright 2017-2021 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#include "erpc_config_internal.h"
+#if ERPC_MESSAGE_LOGGING
 
 #include "erpc_message_loggers.h"
 
-#include "erpc_manually_constructed.h"
-
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
 #include <new>
-#endif
 
 using namespace erpc;
 using namespace std;
@@ -21,8 +19,6 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-
-ERPC_MANUALLY_CONSTRUCTED_ARRAY_STATIC(MessageLogger, s_messageLoggersManual, ERPC_MESSAGE_LOGGERS_COUNT);
 
 MessageLoggers::~MessageLoggers(void)
 {
@@ -32,7 +28,7 @@ MessageLoggers::~MessageLoggers(void)
     {
         logger = m_logger;
         m_logger = m_logger->getNext();
-        ERPC_DESTROY_OBJECT(logger, s_messageLoggersManual, ERPC_MESSAGE_LOGGERS_COUNT)
+        delete logger;
     }
 }
 
@@ -44,7 +40,7 @@ bool MessageLoggers::addMessageLogger(Transport *transport)
 
     if (transport != NULL)
     {
-        logger = create(transport);
+        logger = new (nothrow) MessageLogger(transport);
         if (logger != NULL)
         {
             if (m_logger == NULL)
@@ -88,8 +84,4 @@ erpc_status_t MessageLoggers::logMessage(MessageBuffer *msg)
 
     return err;
 }
-
-MessageLogger *MessageLoggers::create(Transport *transport)
-{
-    ERPC_CREATE_NEW_OBJECT(MessageLogger, s_messageLoggersManual, ERPC_MESSAGE_LOGGERS_COUNT, transport)
-}
+#endif /* ERPC_MESSAGE_LOGGING */
