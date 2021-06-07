@@ -13,6 +13,8 @@
 
 #include "erpc_codec.h"
 
+#include <new>
+
 /*!
  * @addtogroup infra_codec
  * @{
@@ -383,14 +385,14 @@ public:
      *
      * @return Pointer to created codec.
      */
-    virtual Codec *create(void) override;
+    virtual Codec *create(void) override { return new (std::nothrow) BasicCodec; }
 
     /*!
      * @brief Dispose codec.
      *
      * @param[in] codec Codec to dispose.
      */
-    virtual void dispose(Codec *codec) override;
+    virtual void dispose(Codec *codec) override { delete codec; }
 };
 
 } // namespace erpc
