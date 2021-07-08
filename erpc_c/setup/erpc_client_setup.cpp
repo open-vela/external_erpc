@@ -30,8 +30,8 @@ using namespace erpc;
 
 // global client variables
 static ManuallyConstructed<ClientManager> s_client;
-ClientManager *g_client;
-#pragma weak g_client
+extern ClientManager *g_client;
+ClientManager *g_client = NULL;
 static ManuallyConstructed<BasicCodecFactory> s_codecFactory;
 static ManuallyConstructed<Crc16> s_crc16;
 
