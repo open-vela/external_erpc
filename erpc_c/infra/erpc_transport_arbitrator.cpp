@@ -186,8 +186,15 @@ TransportArbitrator::PendingClientInfo *TransportArbitrator::addPendingClient(vo
     }
 
     // Add to active list.
-	info->m_next = m_clientList;
-	m_clientList = info;
+    if (!m_clientList)
+    {
+        m_clientList = info;
+    }
+    else
+    {
+        info->m_next = m_clientList;
+        m_clientList = info;
+    }
 
     return info;
 }
