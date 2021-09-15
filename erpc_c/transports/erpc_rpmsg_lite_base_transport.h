@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
- * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -12,16 +11,8 @@
 #define _EMBEDDED_RPC__RPMSG_LITE_BASE_TRANSPORT_H_
 
 #include "erpc_transport.h"
-#include "erpc_config_internal.h"
 
 #include "rpmsg_lite.h"
-
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-#ifndef RL_USE_STATIC_API
-#warning "RPMSG is not set to use static allocation"
-#endif
-#endif
-
 
 /*!
  * @addtogroup rpmsg_lite_transport
@@ -37,9 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Classes
 ////////////////////////////////////////////////////////////////////////////////
-
-/* TODO: replace bellow size representing sizeof(rpmsg_queue_rx_cb_data_t)*/
-#define SIZE_OF_RPMSG_QUEUE 12
 
 namespace erpc {
 /*!
@@ -66,12 +54,6 @@ public:
 protected:
     static struct rpmsg_lite_instance *s_rpmsg; /*!< Pointer to instance of RPMSG lite. */
     static uint8_t s_initialized;               /*!< Represent information if the rpmsg-lite was initialized. */
-#if RL_USE_STATIC_API
-    struct rpmsg_lite_instance m_static_context;
-    struct rpmsg_lite_ept_static_context m_ept_context;
-    rpmsg_static_queue m_queue_context;
-    uint8_t m_queue_stack[SIZE_OF_RPMSG_QUEUE * RL_BUFFER_COUNT];
-#endif
 };
 
 } // namespace erpc
