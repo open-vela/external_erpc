@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2017-2021 NXP
+ * Copyright 2017-2020 NXP
  * Copyright 2019-2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -174,7 +174,9 @@ erpc_status_t RPMsgTTYRTOSTransport::init(uint32_t src_addr, uint32_t dst_addr, 
                 ready_cb();
             }
 
-            rpmsg_lite_is_link_up_wait(s_rpmsg);
+            while (0 == rpmsg_lite_is_link_up(s_rpmsg))
+            {
+            }
 
 #if RL_USE_STATIC_API
             m_rpmsg_queue = rpmsg_queue_create(s_rpmsg, m_queue_stack, &m_queue_context);
@@ -261,7 +263,7 @@ erpc_status_t RPMsgTTYRTOSTransport::receive(MessageBuffer *message)
 
     if (ret_val == RL_SUCCESS)
     {
-        (void)memcpy((uint8_t *)&h, buf, sizeof(h));
+        memcpy((uint8_t *)&h, buf, sizeof(h));
         message->set(&((uint8_t *)buf)[sizeof(h)], length - sizeof(h));
 
         /* Verify CRC. */

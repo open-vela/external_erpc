@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2017 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -9,6 +9,7 @@
  */
 
 #include "erpc_basic_codec.h"
+
 #include "erpc_manually_constructed.h"
 
 #if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
@@ -22,11 +23,11 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t BasicCodec::kBasicCodecVersion = 1UL;
+const uint8_t BasicCodec::kBasicCodecVersion = 1;
 
 void BasicCodec::startWriteMessage(message_type_t type, uint32_t service, uint32_t request, uint32_t sequence)
 {
-    uint32_t header = (kBasicCodecVersion << 24u) | ((service & 0xffu) << 16u) | ((request & 0xffu) << 8u) | ((uint32_t)type & 0xffu);
+    uint32_t header = (kBasicCodecVersion << 24) | ((service & 0xff) << 16) | ((request & 0xff) << 8) | (type & 0xff);
 
     write(header);
 
@@ -35,7 +36,7 @@ void BasicCodec::startWriteMessage(message_type_t type, uint32_t service, uint32
 
 void BasicCodec::writeData(const void *value, uint32_t length)
 {
-    if (isStatusOk())
+    if (!m_status)
     {
         if (value != NULL)
         {
@@ -51,7 +52,7 @@ void BasicCodec::writeData(const void *value, uint32_t length)
 void BasicCodec::write(bool value)
 {
     // Make sure the bool is a single byte.
-    uint8_t v = (uint8_t)value;
+    uint8_t v = value;
 
     writeData(&v, sizeof(v));
 }
@@ -108,7 +109,7 @@ void BasicCodec::write(double value)
 
 void BasicCodec::writePtr(uintptr_t value)
 {
-    uint8_t ptrSize = (uint8_t)sizeof(value);
+    uint8_t ptrSize = sizeof(value);
 
     write(ptrSize);
 
@@ -188,7 +189,7 @@ void BasicCodec::startReadMessage(message_type_t *type, uint32_t *service, uint3
         updateStatus(kErpcStatus_InvalidMessageVersion);
     }
 
-    if (isStatusOk())
+    if (!m_status)
     {
         *service = ((header >> 16) & 0xffU);
         *request = ((header >> 8) & 0xffU);
@@ -200,7 +201,7 @@ void BasicCodec::startReadMessage(message_type_t *type, uint32_t *service, uint3
 
 void BasicCodec::readData(void *value, uint32_t length)
 {
-    if (isStatusOk())
+    if (!m_status)
     {
         if (value != NULL)
         {
@@ -218,9 +219,9 @@ void BasicCodec::read(bool *value)
     uint8_t v = 0;
 
     readData(&v, sizeof(v));
-    if (isStatusOk())
+    if (!m_status)
     {
-        *value = (bool)v;
+        *value = v;
     }
 }
 
@@ -298,7 +299,7 @@ void BasicCodec::readBinary(uint32_t *length, uint8_t **value)
     // Read length first as u32.
     read(length);
 
-    if (isStatusOk())
+    if (!m_status)
     {
         if (m_cursor.getRemaining() >= *length)
         {
@@ -306,7 +307,7 @@ void BasicCodec::readBinary(uint32_t *length, uint8_t **value)
             *value = m_cursor.get();
 
             // Skip over data.
-            m_cursor += (uint16_t)*length;
+            m_cursor += *length;
         }
         else
         {
@@ -377,12 +378,12 @@ void BasicCodec::readCallback(funPtr callbacks1, funPtr *callback2)
 
 ERPC_MANUALLY_CONSTRUCTED_ARRAY_STATIC(BasicCodec, s_basicCodecManual, ERPC_CODEC_COUNT);
 
-Codec *BasicCodecFactory ::create(void)
+Codec *BasicCodecFactory::create()
 {
     ERPC_CREATE_NEW_OBJECT(BasicCodec, s_basicCodecManual, ERPC_CODEC_COUNT)
 }
 
-void BasicCodecFactory ::dispose(Codec *codec)
+void BasicCodecFactory::dispose(Codec *codec)
 {
     ERPC_DESTROY_OBJECT(codec, s_basicCodecManual, ERPC_CODEC_COUNT)
 }
