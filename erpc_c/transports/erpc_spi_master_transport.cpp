@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2020 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -51,10 +51,10 @@ static inline void SpiMasterTransport_NotifyTransferGpioInit()
     gpioConfig.pinDirection = kGPIO_DigitalInput;
 
     PORT_SetPinInterruptConfig(ERPC_BOARD_SPI_INT_PORT, ERPC_BOARD_SPI_INT_PIN, kPORT_InterruptFallingEdge);
-    (void)EnableIRQ(ERPC_BOARD_SPI_INT_PIN_IRQ);
+    EnableIRQ(ERPC_BOARD_SPI_INT_PIN_IRQ);
 
     GPIO_PinInit(ERPC_BOARD_SPI_INT_GPIO, ERPC_BOARD_SPI_INT_PIN, &gpioConfig);
-    if (0U == GPIO_PinRead(ERPC_BOARD_SPI_INT_GPIO, ERPC_BOARD_SPI_INT_PIN))
+    if (!GPIO_PinRead(ERPC_BOARD_SPI_INT_GPIO, ERPC_BOARD_SPI_INT_PIN))
     {
         s_isSlaveReady = true;
     }
@@ -73,7 +73,7 @@ static inline void SpidevMasterTransport_WaitForSlaveReadyMarker(SPI_Type *spiBa
     uint8_t data;
     spi_transfer_t masterXferSlaveReadyMarker;
 
-    for (;;)
+    while (1)
     {
         masterXferSlaveReadyMarker.txData = NULL;
         masterXferSlaveReadyMarker.rxData = &data;

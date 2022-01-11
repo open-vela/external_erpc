@@ -252,7 +252,7 @@ int serial_read(int fd, char *buf, int size)
 
             if (bytesRead)
             {
-                (void)memcpy(buf, temp, bytesRead);
+                memcpy(buf, temp, bytesRead);
                 buf += bytesRead;
             }
 
@@ -306,7 +306,7 @@ int serial_open(const char *port)
     }
     else
     {
-        (void)memcpy(full_path, port, strnlen_s(port, sizeof(full_path) - 1));
+        memcpy(full_path, port, strnlen_s(port, sizeof(full_path) - 1));
     }
 
     hCom = CreateFileA(full_path, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);

@@ -196,7 +196,7 @@ class RpmsgTransport(Transport):
         return ret[1]
 
 class LIBUSBSIOSPITransport(FramedTransport):
-    def __init__(self, baudrate = None, cs_gpio_port = None, cs_gpio_pin = None, devidx = None):
+    def __init__(self, baudrate = None, cs_gpio_port = None, cs_gpio_pin = None):
         super(LIBUSBSIOSPITransport, self).__init__()
 
         if not LIBUSBSIOReady:
@@ -206,13 +206,9 @@ class LIBUSBSIOSPITransport(FramedTransport):
         if baudrate is None:
             baudrate = 500000
 
-        if devidx is None:
-            devidx = 0
-
         self._baudrate = baudrate
         self._cs_gpio_port = cs_gpio_port
         self._cs_gpio_pin = cs_gpio_pin
-        self._devidx = devidx
         self._gpioport = 0
         self._gpiopin = 0
         self._gpiomode = 0
@@ -237,9 +233,9 @@ class LIBUSBSIOSPITransport(FramedTransport):
                 return
         print('Total LIBUSBSIO devices: %d \r\n' % res)
 
-        # Open device at given index
-        self._hSIOPort = self.sio.Open (int(self._devidx))
-
+        # Open device at index 0
+        self._hSIOPort = self.sio.Open (0)
+    
         # Get the device version
         s = self.sio.GetVersion ()
         str1 = ""
@@ -299,7 +295,7 @@ class LIBUSBSIOSPITransport(FramedTransport):
             return b"\00" * count
 
 class LIBUSBSIOI2CTransport(FramedTransport):
-    def __init__(self, baudrate = None, devidx = None):
+    def __init__(self, baudrate = None):
         super(LIBUSBSIOI2CTransport, self).__init__()
 
         if not LIBUSBSIOReady:
@@ -309,11 +305,7 @@ class LIBUSBSIOI2CTransport(FramedTransport):
         if baudrate is None:
             baudrate = 100000
 
-        if devidx is None:
-            devidx = 0
-
         self._baudrate = baudrate
-        self._devidx = devidx
         self._gpioport = 0
         self._gpiopin = 0
         self._gpiomode = 0
@@ -338,9 +330,9 @@ class LIBUSBSIOI2CTransport(FramedTransport):
                 return
         print('Total LIBUSBSIO devices: %d \r\n' % res)
 
-        # Open device at given index
-        self._hSIOPort = self.sio.Open (int(self._devidx))
-
+        # Open device at index 0
+        self._hSIOPort = self.sio.Open (0)
+    
         # Get the device version
         s = self.sio.GetVersion ()
         str1 = ""
