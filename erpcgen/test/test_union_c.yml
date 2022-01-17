@@ -48,6 +48,8 @@ idl: |
       binary rawString
   }
 
+  //  const int32 returnVal = 10;
+
   union unionType
   {
     case apple:
@@ -201,14 +203,6 @@ test_server.cpp:
   - "{"
   - switch (discriminator)
   - "{"
-  - "case banana:"
-  - not: "break;"
-  - "case papaya:"
-  - "case returnVal:"
-  - "default:"
-  - "{"
-  - "break;"
-  - "}"
   - "case apple:"
   - "{"
   - free_foobar_struct(&data->myFoobar);
