@@ -11,7 +11,6 @@ from erpc import erpc_version
 from codecs import open
 from os import path
 
-ERPC_VERSION = None
 here = path.abspath(path.dirname(__file__))
 
 with open(path.join(here, 'README_Pypi.md'), encoding='utf-8') as f:
