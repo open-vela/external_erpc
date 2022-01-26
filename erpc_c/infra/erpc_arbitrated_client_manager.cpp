@@ -10,8 +10,7 @@
 
 #include "erpc_arbitrated_client_manager.h"
 #include "erpc_transport_arbitrator.h"
-
-#include "assert.h"
+#include "erpc_config.h"
 
 #if ERPC_THREADS_IS(NONE)
 #error "Arbitrator code does not work in no-threading configuration."
@@ -42,7 +41,7 @@ void ArbitratedClientManager::performClientRequest(RequestContext &request)
     erpc_status_t err;
     TransportArbitrator::client_token_t token = 0;
 
-    assert(m_arbitrator && "arbitrator not set");
+    erpc_assert(m_arbitrator && "arbitrator not set");
 
     // Set up the client receive before we send the request, so if the reply is sent
     // before we get to the clientReceive() call below the arbitrator already has the buffer.
