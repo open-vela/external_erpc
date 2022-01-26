@@ -9,6 +9,7 @@
  */
 
 #include "erpc_basic_codec.h"
+#include "erpc_config.h"
 #include "erpc_manually_constructed.h"
 
 #if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
@@ -150,7 +151,7 @@ void BasicCodec::writeCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, 
 {
     uint8_t i;
 
-    assert(callbacksCount > 1U);
+    erpc_assert(callbacksCount > 1U);
 
     // callbacks = callbacks table
     for (i = 0; i < callbacksCount; i++)
@@ -352,7 +353,7 @@ void BasicCodec::readCallback(arrayOfFunPtr callbacks, uint8_t callbacksCount, f
 {
     uint8_t _tmp_local;
 
-    assert(callbacksCount > 1U);
+    erpc_assert(callbacksCount > 1U);
 
     // callbacks = callbacks table
     read(&_tmp_local);
