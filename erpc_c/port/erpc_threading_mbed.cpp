@@ -13,6 +13,7 @@
 #include "erpc_threading.h"
 
 #include "platform/CriticalSectionLock.h"
+#include "platform/mbed_assert.h"
 
 #if ERPC_THREADS_IS(MBED)
 
@@ -134,7 +135,7 @@ void Thread::threadEntryPoint(void)
 void Thread::threadEntryPointStub(void *arg)
 {
     Thread *_this = reinterpret_cast<Thread *>(arg);
-    erpc_assert(_this); // Reinterpreting 'void *arg' to 'Thread *' failed.
+    MBED_ASSERT(_this); // Reinterpreting 'void *arg' to 'Thread *' failed.
     _this->threadEntryPoint();
 
     // Remove this thread from the linked list.

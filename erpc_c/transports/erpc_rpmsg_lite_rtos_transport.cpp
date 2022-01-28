@@ -9,9 +9,12 @@
  */
 
 #include "erpc_rpmsg_lite_rtos_transport.h"
+
 #include "erpc_config_internal.h"
 
 #include "rpmsg_ns.h"
+
+#include <cassert>
 
 using namespace erpc;
 
@@ -246,7 +249,7 @@ erpc_status_t RPMsgRTOSTransport::receive(MessageBuffer *message)
     int32_t ret_val;
 
     ret_val = rpmsg_queue_recv_nocopy(s_rpmsg, m_rpmsg_queue, &m_dst_addr, &buf, &length, RL_BLOCK);
-    erpc_assert(buf);
+    assert(buf);
     message->set((uint8_t *)buf, length);
     message->setUsed(length);
 
