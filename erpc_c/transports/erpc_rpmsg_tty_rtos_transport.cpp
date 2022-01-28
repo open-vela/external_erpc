@@ -9,10 +9,13 @@
  */
 
 #include "erpc_rpmsg_tty_rtos_transport.h"
+
 #include "erpc_config_internal.h"
 #include "erpc_framed_transport.h"
 
 #include "rpmsg_ns.h"
+
+#include <cassert>
 
 using namespace erpc;
 using namespace std;
@@ -71,7 +74,7 @@ RPMsgTTYRTOSTransport::~RPMsgTTYRTOSTransport(void)
 
 void RPMsgTTYRTOSTransport::setCrc16(Crc16 *crcImpl)
 {
-    erpc_assert(crcImpl);
+    assert(crcImpl);
     m_crcImpl = crcImpl;
 }
 
@@ -255,8 +258,8 @@ erpc_status_t RPMsgTTYRTOSTransport::receive(MessageBuffer *message)
     int32_t ret_val = rpmsg_queue_recv_nocopy(s_rpmsg, m_rpmsg_queue, &m_dst_addr, &buf, &length, RL_BLOCK);
     uint16_t computedCrc;
 
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
-    erpc_assert(buf);
+    assert(m_crcImpl && "Uninitialized Crc16 object.");
+    assert(buf);
 
     if (ret_val == RL_SUCCESS)
     {
@@ -291,7 +294,7 @@ erpc_status_t RPMsgTTYRTOSTransport::send(MessageBuffer *message)
     uint32_t used = message->getUsed();
     int32_t ret_val;
 
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    assert(m_crcImpl && "Uninitialized Crc16 object.");
     message->set(NULL, 0);
 
     h.m_crc = m_crcImpl->computeCRC16(buf, used);

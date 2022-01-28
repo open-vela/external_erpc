@@ -9,12 +9,15 @@
  */
 
 #include "erpc_server_setup.h"
+
 #include "erpc_basic_codec.h"
 #include "erpc_crc16.h"
 #include "erpc_manually_constructed.h"
 #include "erpc_message_buffer.h"
 #include "erpc_simple_server.h"
 #include "erpc_transport.h"
+
+#include <cassert>
 
 using namespace erpc;
 
@@ -35,7 +38,7 @@ ERPC_MANUALLY_CONSTRUCTED(Crc16, s_crc16);
 
 erpc_server_t erpc_server_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory)
 {
-    erpc_assert(transport);
+    assert(transport);
 
     Transport *castedTransport;
 
@@ -144,14 +147,14 @@ bool erpc_server_add_message_logger(erpc_transport_t transport)
 #if ERPC_PRE_POST_ACTION
 void erpc_client_add_pre_cb_action(pre_post_action_cb preCB)
 {
-    erpc_assert(g_server);
+    assert(g_server);
 
     g_server->addPreCB(preCB);
 }
 
 void erpc_client_add_post_cb_action(pre_post_action_cb postCB)
 {
-    erpc_assert(g_server);
+    assert(g_server);
 
     g_server->addPostCB(postCB);
 }
