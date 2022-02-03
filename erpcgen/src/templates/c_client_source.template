@@ -1,4 +1,4 @@
-{% if mlComment != ""%}
+{% if mlComment != "" %}
 {$mlComment}
 
 {% endif %}
@@ -47,8 +47,7 @@ extern ClientManager *g_client;
 
 {% endif -- generateErrorChecks %}
 {% if fn.returnValue.type.isNotVoid %}
-    {$fn.returnValue.resultVariable}{% if fn.returnValue.isNullReturnType %} = NULL{%endif%};
-{% endif -- isNotVoid %}
+    {$fn.returnValue.resultVariable}{% if fn.returnValue.isNullReturnType %} = NULL{% endif %};
 
 #if ERPC_PRE_POST_ACTION
     pre_post_action_cb preCB = g_client->getPreCB();
@@ -58,6 +57,7 @@ extern ClientManager *g_client;
     }
 #endif
 
+{% endif -- isNotVoid %}
     // Get a new request.
 {% if !fn.isReturnValue %}
     RequestContext request = g_client->createRequest(true);
@@ -141,6 +141,7 @@ extern ClientManager *g_client;
     // Invoke error handler callback function
     g_client->callErrorHandler(err, {$functionIDName});
 {% endif -- generateErrorChecks %}
+{% if generateErrorChecks && fn.returnValue.type.isNotVoid %}
 
 #if ERPC_PRE_POST_ACTION
     pre_post_action_cb postCB = g_client->getPostCB();
@@ -150,7 +151,6 @@ extern ClientManager *g_client;
     }
 #endif
 
-{% if generateErrorChecks && fn.returnValue.type.isNotVoid %}
 {%  if empty(fn.returnValue.errorReturnValue) == false && fn.returnValue.isNullReturnType == false %}
 
     if (err != kErpcStatus_Success)
