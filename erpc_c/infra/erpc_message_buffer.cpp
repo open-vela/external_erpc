@@ -102,11 +102,7 @@ erpc_status_t MessageBuffer::Cursor::read(void *data, uint32_t length)
 
     erpc_status_t err;
 
-    if ((length > 0U) && (data == NULL))
-    {
-        err = kErpcStatus_MemoryError;
-    }
-    else if (length > m_remaining)
+    if (m_remaining < length)
     {
         err = kErpcStatus_BufferOverrun;
     }
@@ -128,11 +124,7 @@ erpc_status_t MessageBuffer::Cursor::write(const void *data, uint32_t length)
 
     erpc_status_t err;
 
-    if ((length > 0U) && (data == NULL))
-    {
-        err = kErpcStatus_MemoryError;
-    }
-    else if (length > m_remaining)
+    if (length > m_remaining)
     {
         err = kErpcStatus_BufferOverrun;
     }
