@@ -329,12 +329,6 @@ DataType *CGenerator::findChildDataType(set<DataType *> &dataTypes, DataType *da
 
             if (isBinaryStruct(structType) || isListStruct(structType))
             {
-                DataType *memberDataType = structType->getMembers()[0]->getDataType();
-                if (memberDataType->isList())
-                {
-                    ListType *memberListDataType = dynamic_cast<ListType *>(memberDataType);
-                    findChildDataType(dataTypes, memberListDataType->getElementType());
-                }
                 break;
             }
 

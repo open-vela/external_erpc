@@ -1,5 +1,0 @@
-{
-    "makefile.extensionOutputFolder": "./.vscode",
-    "makefile.buildBeforeLaunch": true,
-    "makefile.clearOutputBeforeBuild": true,
-}

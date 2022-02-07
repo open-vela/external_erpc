@@ -459,12 +459,7 @@ struct
 {% enddef ------------------------------- unionMembersDeclaration %}
 
 {% def f_paramIsNullableEncode(param) %}
-{% if ((source == "client") && (param.direction != ReturnDirection) && (empty(param.lengthName) == false)) %}
-{%  set lengthNameCon = ") || (" & param.lengthName & " == NULL)" >%}
-{% else %}
-{%  set lengthNameCon = "" >%}
-{% endif %}
-if ({% if lengthNameCon != "" %}({% endif %}{$param.nullableName} == NULL{$lengthNameCon})
+if ({$param.nullableName} == NULL{% if ((source == "client") && (param.direction != ReturnDirection) && (empty(param.lengthName) == false)) %} || {$param.lengthName} == NULL{% endif %})
 {
     codec->writeNullFlag(true);
 }
