@@ -1,9 +1,11 @@
-# eRPC Python Infrastructure
+eRPC Python Infrastructure
+==========================
 
 This folder contains the Python implementation of the eRPC infrastructure.
 
 The Python implementation of eRPC is fully compatible with the C/C++ implementation at the
 protocol level. Also, the classes mirror those in the C++ infrastructure.
+
 
 ## Contents
 
@@ -17,28 +19,22 @@ protocol level. Also, the classes mirror those in the C++ infrastructure.
 
 Pip package installer needs to be installed in your Python version. Use following way for Python3 pip installation:
 
-```sh
-sudo apt-get install python3-pip
-/usr/bin$ sudo rm python
-/usr/bin$ sudo ln -s python3 python
-```
+    sudo apt-get install python3-pip
+    /usr/bin$ sudo rm python
+    /usr/bin$ sudo ln -s python3 python
 
 To install the eRPC Python infrastructure, run the setup.py script like this (based on your system admin rights are required):
 
-```sh
-python setup.py install
-```
+    python setup.py install
 
 Alternatively, you may use pip to install the package, like this:
 
-```sh
-pip install .
-```
+    pip install .
+
 
 Once installed, you can access the infrastructure via a standard import statement.
 
-```python
-import erpc
-xport = erpc.transport.SerialTransport("/dev/ttyS1", 115200)
-client = erpc.client.ClientManager(xport, erpc.basic_codec.BasicCodec)
-```
+    >>>import erpc
+    >>>xport = erpc.transport.SerialTransport("/dev/ttyS1", 115200)
+    >>>client = erpc.client.ClientManager(xport, erpc.basic_codec.BasicCodec)
+
