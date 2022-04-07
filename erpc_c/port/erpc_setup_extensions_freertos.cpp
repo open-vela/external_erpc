@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020 NXP
  * Copyright 2020-2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -10,6 +10,8 @@
 #include "erpc_manually_constructed.h"
 #include "erpc_setup_extensions.h"
 #include "erpc_threading.h"
+
+#include <cassert>
 
 using namespace erpc;
 
@@ -23,24 +25,24 @@ ERPC_MANUALLY_CONSTRUCTED_STATIC(Semaphore, s_semaphore);
 
 void erpc::erpc_pre_cb_default(void)
 {
-    erpc_assert(s_erpc_call_in_progress &&
+    assert(s_erpc_call_in_progress &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
     (void)s_erpc_call_in_progress->get(s_erpc_call_in_progress->kWaitForever);
-    erpc_assert(s_erpc_call_timer_cb &&
+    assert(s_erpc_call_timer_cb &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
-    (void)xTimerStart(s_erpc_call_timer_cb, 0);
+    xTimerStart(s_erpc_call_timer_cb, 0);
 }
 
 void erpc::erpc_post_cb_default(void)
 {
-    (void)xTimerStop(s_erpc_call_timer_cb, 0);
+    xTimerStop(s_erpc_call_timer_cb, 0);
     s_erpc_call_in_progress->put();
 }
 
 static void erpc_call_timer_cb_default(TimerHandle_t xTimer)
 {
     (void)xTimer;
-    erpc_assert(1 && "eRPC task freezed.");
+    assert(1 && "eRPC task freezed.");
 }
 
 void erpc_init_call_progress_detection_default(
@@ -54,7 +56,7 @@ void erpc_init_call_progress_detection_default(
     s_semaphore.construct(semaphoreCount);
     s_erpc_call_in_progress = s_semaphore.get();
 #endif
-    erpc_assert(s_erpc_call_in_progress && "Creating eRPC semaphore failed.");
+    assert(s_erpc_call_in_progress && "Creating eRPC semaphore failed.");
 
 #if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
     s_erpc_call_timer_cb = xTimerCreateStatic("Erpc client call timer", waitTimeMs / portTICK_PERIOD_MS, pdFALSE, NULL,
@@ -63,7 +65,7 @@ void erpc_init_call_progress_detection_default(
     s_erpc_call_timer_cb =
         xTimerCreate("Erpc client call timer", waitTimeMs / portTICK_PERIOD_MS, pdFALSE, NULL, erpc_call_timer_cb);
 #endif
-    erpc_assert(s_erpc_call_timer_cb && "Creating eRPC timer failed.");
+    assert(s_erpc_call_timer_cb && "Creating eRPC timer failed.");
 }
 
 void erpc_deinit_call_progress_detection_default(void)
@@ -78,14 +80,14 @@ void erpc_deinit_call_progress_detection_default(void)
 
     if (s_erpc_call_timer_cb != NULL)
     {
-        (void)xTimerDelete(s_erpc_call_timer_cb, 0);
+        xTimerDelete(s_erpc_call_timer_cb, 0);
         s_erpc_call_timer_cb = NULL;
     }
 }
 
 bool erpc_is_call_in_progress_default(void)
 {
-    erpc_assert(s_erpc_call_in_progress &&
+    assert(s_erpc_call_in_progress &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
     if (s_erpc_call_in_progress->get(0))
     {
@@ -98,12 +100,12 @@ bool erpc_is_call_in_progress_default(void)
 void erpc_reset_in_progress_state_default(void)
 {
 
-    erpc_assert(s_erpc_call_in_progress &&
+    assert(s_erpc_call_in_progress &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
     s_erpc_call_in_progress->get(0);
     s_erpc_call_in_progress->put();
 
-    erpc_assert(s_erpc_call_timer_cb &&
+    assert(s_erpc_call_timer_cb &&
            "If you want use default pre cb action, do not forget call erpc_init_call_progress_detection_default.");
-    (void)xTimerStop(s_erpc_call_timer_cb, 0);
+    xTimerStop(s_erpc_call_timer_cb, 0);
 }

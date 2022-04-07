@@ -9,8 +9,10 @@
  */
 
 #include "erpc_framed_transport.h"
+
 #include "erpc_message_buffer.h"
 
+#include <cassert>
 #include <cstdio>
 
 using namespace erpc;
@@ -33,7 +35,7 @@ FramedTransport::~FramedTransport(void) {}
 
 void FramedTransport::setCrc16(Crc16 *crcImpl)
 {
-    erpc_assert(crcImpl);
+    assert(crcImpl);
     m_crcImpl = crcImpl;
 }
 
@@ -43,7 +45,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
     erpc_status_t retVal;
     uint16_t computedCrc;
 
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    assert(m_crcImpl && "Uninitialized Crc16 object.");
 
     {
 #if !ERPC_THREADS_IS(NONE)
@@ -101,7 +103,7 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
     uint16_t messageLength;
     Header h;
 
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    assert(m_crcImpl && "Uninitialized Crc16 object.");
 
 #if !ERPC_THREADS_IS(NONE)
     Mutex::Guard lock(m_sendLock);

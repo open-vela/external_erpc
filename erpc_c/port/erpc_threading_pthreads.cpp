@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016 - 2021 NXP
+ * Copyright 2016 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -44,8 +44,7 @@ Thread::Thread(const char *name)
 {
 }
 
-Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name,
-               thread_stack_pointer stackPtr)
+Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
 : m_name(name)
 , m_entry(entry)
 , m_arg(0)
@@ -57,12 +56,11 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
 
 Thread::~Thread(void) {}
 
-void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize, thread_stack_pointer stackPtr)
+void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize)
 {
     m_entry = entry;
     m_stackSize = stackSize;
     m_priority = priority;
-    m_stackPtr = stackPtr;
 }
 
 void Thread::start(void *arg)
@@ -185,7 +183,7 @@ void Semaphore::put(void)
     ++m_count;
 }
 
-bool Semaphore::get(uint32_t timeoutUsecs)
+bool Semaphore::get(uint32_t timeout)
 {
     Mutex::Guard guard(m_mutex);
     bool retVal = true;
@@ -193,7 +191,7 @@ bool Semaphore::get(uint32_t timeoutUsecs)
 
     while (m_count == 0)
     {
-        if (timeoutUsecs == kWaitForever)
+        if (timeout == kWaitForever)
         {
             err = pthread_cond_wait(&m_cond, m_mutex.getPtr());
             if (err != 0)
@@ -204,14 +202,14 @@ bool Semaphore::get(uint32_t timeoutUsecs)
         }
         else
         {
-            if (timeoutUsecs > 0U)
+            if (timeout > 0U)
             {
                 // Create an absolute timeout time.
                 struct timeval tv;
                 gettimeofday(&tv, NULL);
                 struct timespec wait;
-                wait.tv_sec = tv.tv_sec + (timeoutUsecs / sToUs);
-                wait.tv_nsec = (timeoutUsecs % sToUs) * 1000U;
+                wait.tv_sec = tv.tv_sec + (timeout / sToUs);
+                wait.tv_nsec = (timeout % sToUs) * 1000U;
                 err = pthread_cond_timedwait(&m_cond, m_mutex.getPtr(), &wait);
                 if (err != 0)
                 {

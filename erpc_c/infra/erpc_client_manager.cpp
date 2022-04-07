@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2017 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -9,6 +9,8 @@
  */
 
 #include "erpc_client_manager.h"
+
+#include "assert.h"
 
 using namespace erpc;
 
@@ -47,7 +49,7 @@ void ClientManager::performRequest(RequestContext &request)
 #if ERPC_NESTED_CALLS
     if (performRequest)
     {
-        erpc_assert(m_serverThreadId && "server thread id was not set");
+        assert(m_serverThreadId && "server thread id was not set");
         if (Thread::getCurrentThreadId() == m_serverThreadId)
         {
             performNestedClientRequest(request);
@@ -118,7 +120,7 @@ void ClientManager::performNestedClientRequest(RequestContext &request)
 {
     erpc_status_t err;
 
-    erpc_assert(m_transport && "transport/arbitrator not set");
+    assert(m_transport && "transport/arbitrator not set");
 
 #if ERPC_MESSAGE_LOGGING
     if (request.getCodec()->isStatusOk() == true)
@@ -141,7 +143,7 @@ void ClientManager::performNestedClientRequest(RequestContext &request)
         // Receive reply.
         if (request.getCodec()->isStatusOk() == true)
         {
-            erpc_assert(m_server && "server for nesting calls was not set");
+            assert(m_server && "server for nesting calls was not set");
             err = m_server->run(request);
             request.getCodec()->updateStatus(err);
         }
@@ -195,7 +197,7 @@ Codec *ClientManager::createBufferAndCodec(void)
     if (codec != NULL)
     {
         message = m_messageFactory->create();
-        if (NULL != message.get())
+        if (message.get())
         {
             codec->setBuffer(message);
         }
@@ -212,11 +214,8 @@ Codec *ClientManager::createBufferAndCodec(void)
 
 void ClientManager::releaseRequest(RequestContext &request)
 {
-    if (request.getCodec() != NULL)
-    {
-        m_messageFactory->dispose(request.getCodec()->getBuffer());
-        m_codecFactory->dispose(request.getCodec());
-    }
+    m_messageFactory->dispose(request.getCodec()->getBuffer());
+    m_codecFactory->dispose(request.getCodec());
 }
 
 void ClientManager::callErrorHandler(erpc_status_t err, uint32_t functionID)

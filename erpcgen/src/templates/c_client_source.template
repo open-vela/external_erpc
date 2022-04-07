@@ -1,4 +1,4 @@
-{% if mlComment != "" %}
+{% if mlComment != ""%}
 {$mlComment}
 
 {% endif %}
@@ -47,8 +47,7 @@ extern ClientManager *g_client;
 
 {% endif -- generateErrorChecks %}
 {% if fn.returnValue.type.isNotVoid %}
-    {$fn.returnValue.resultVariable}{% if fn.returnValue.isNullReturnType %} = NULL{% endif %};
-{% endif -- isNotVoid %}
+    {$fn.returnValue.resultVariable}{% if fn.returnValue.isNullReturnType %} = NULL{%endif%};
 
 #if ERPC_PRE_POST_ACTION
     pre_post_action_cb preCB = g_client->getPreCB();
@@ -58,6 +57,7 @@ extern ClientManager *g_client;
     }
 #endif
 
+{% endif -- isNotVoid %}
     // Get a new request.
 {% if !fn.isReturnValue %}
     RequestContext request = g_client->createRequest(true);
@@ -107,12 +107,7 @@ extern ClientManager *g_client;
 {%  for param in fn.parametersToClient if (param.serializedDirection == "" || param.serializedDirection == InDirection || param.referencedName != "") %}
 
 {%   if param.isNullable %}
-{% if ((source == "client") && (param.direction != ReturnDirection) && (empty(param.lengthName) == false)) %}
-{%  set lengthNameCon = ") && (" & param.lengthName & " != NULL)" >%}
-{% else %}
-{%  set lengthNameCon = "" >%}
-{% endif %}
-{$clientIndent}    if ({% if lengthNameCon != "" %}({% endif %}{$param.nullableName} != NULL{$lengthNameCon})
+{$clientIndent}    if ({$param.nullableName} != NULL{% if ((source == "client") && (param.direction != ReturnDirection) && (empty(param.lengthName) == false)) %} && {$param.lengthName} != NULL{% endif %})
 {$clientIndent}    {
 {$addIndent(clientIndent & "        ", param.coderCall.decode(param.coderCall))}
         }
@@ -146,6 +141,7 @@ extern ClientManager *g_client;
     // Invoke error handler callback function
     g_client->callErrorHandler(err, {$functionIDName});
 {% endif -- generateErrorChecks %}
+{% if generateErrorChecks && fn.returnValue.type.isNotVoid %}
 
 #if ERPC_PRE_POST_ACTION
     pre_post_action_cb postCB = g_client->getPostCB();
@@ -155,7 +151,6 @@ extern ClientManager *g_client;
     }
 #endif
 
-{% if generateErrorChecks && fn.returnValue.type.isNotVoid %}
 {%  if empty(fn.returnValue.errorReturnValue) == false && fn.returnValue.isNullReturnType == false %}
 
     if (err != kErpcStatus_Success)

@@ -1,0 +1,17 @@
+---
+name: static
+desc: dynamic annotation is not used.
+idl: |
+    program test
+
+    interface ErrorTest{
+        oneway f()
+    }
+
+test_server.cpp:
+    - ERPC_MANUALLY_CONSTRUCTED_STATIC(ErrorTest_service, s_ErrorTest_service);
+    - erpc_service_t create_ErrorTest_service()
+    - "{"
+    - s_ErrorTest_service.construct();
+    - return s_ErrorTest_service.get();
+    - "}"

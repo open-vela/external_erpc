@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -41,8 +41,7 @@ Thread::Thread(const char *name)
 {
 }
 
-Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name,
-               thread_stack_pointer stackPtr)
+Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, const char *name)
 : m_name(name)
 , m_entry(entry)
 , m_arg(0)
@@ -56,12 +55,12 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
 
 Thread::~Thread(void) {}
 
-void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize, thread_stack_pointer stackPtr)
+void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize)
 {
     m_entry = entry;
     m_stackSize = stackSize;
     m_priority = priority;
-    m_stackPtr = stackPtr;
+
     if (m_critical_section_inited == FALSE)
     {
         InitializeCriticalSection(&m_critical_section);
@@ -194,21 +193,9 @@ void Semaphore::put(void)
     m_mutex.unlock();
 }
 
-bool Semaphore::get(uint32_t timeoutUsecs)
+bool Semaphore::get(uint32_t timeout)
 {
-    if (timeoutUsecs != kWaitForever)
-    {
-        if (timeoutUsecs > 0U)
-        {
-            timeoutUsecs /= 1000U;
-            if (timeoutUsecs == 0U)
-            {
-                timeoutUsecs = 1U;
-            }
-        }
-    }
-
-    DWORD ret = WaitForSingleObject(m_sem, timeoutUsecs);
+    DWORD ret = WaitForSingleObject(m_sem, timeout);
     m_mutex.lock();
     --m_count;
     m_mutex.unlock();

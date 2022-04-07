@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  *
@@ -48,7 +48,7 @@ public:
     RPMsgTransport(void);
 
     /*!
-     * @brief RPMsgTransport destructor
+     * @brief Codec destructor
      */
     virtual ~RPMsgTransport(void);
 
@@ -116,7 +116,7 @@ public:
      *
      * @return True if exist received message, else false.
      */
-    virtual bool hasMessage(void) { return ((0UL < m_messageQueue.size()) ? true: false); }
+    virtual bool hasMessage(void) { return m_messageQueue.size(); }
 
 protected:
     /*!
@@ -137,8 +137,11 @@ protected:
     StaticQueue<MessageBuffer, ERPC_DEFAULT_BUFFERS_COUNT>
         m_messageQueue; /*!< Received messages. Queue of messages with buffers filled in rpmsg callback. */
 
-    uint32_t m_dst_addr;                     /*!< Destination address used by rpmsg. */
-    struct rpmsg_lite_endpoint *m_rpmsg_ept; /*!< Pointer to RPMsg Lite Endpoint structure. */
+    uint32_t m_dst_addr;                                      /*!< Destination address used by rpmsg. */
+    struct rpmsg_lite_ept_static_context m_rpmsg_ept_context; /*!< RPMsg Lite Endpoint static context. */
+    struct rpmsg_lite_endpoint *m_rpmsg_ept;                  /*!< Pointer to RPMsg Lite Endpoint structure. */
+
+    static struct rpmsg_lite_instance s_rpmsg_ctxt; /*!< Context for RPMsg Lite stack instance. */
 };
 
 } // namespace erpc
