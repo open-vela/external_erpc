@@ -28,8 +28,8 @@ test.h:
  - not: float y;
 
 test_client.cpp:
-  - static void write_unionType_union(erpc::Codec * codec, int32_t discriminator, const unionType * data);
-  - static void write_unionType_union(erpc::Codec * codec, int32_t discriminator, const unionType * data)
+    - static void write_unionType_union(erpc::Codec * codec, int32_t discriminator, const unionType * data);
+    - static void write_unionType_union(erpc::Codec * codec, int32_t discriminator, const unionType * data)
 
 test_server.cpp:
   - static void read_unionType_union(erpc::Codec * codec, int32_t * discriminator, unionType * data);
@@ -47,6 +47,8 @@ idl: |
       float a
       binary rawString
   }
+
+  //  const int32 returnVal = 10;
 
   union unionType
   {
@@ -101,8 +103,6 @@ test_client.cpp:
   - static void write_unionType_union(erpc::Codec * codec, int32_t discriminator, const unionType * data);
   - static void write_unionType_union(erpc::Codec * codec, int32_t discriminator, const unionType * data)
   - "{"
-  - if(NULL == data)
-  - return;
   - codec->startWriteUnion(discriminator);
   - switch (discriminator)
   - "{"
@@ -155,8 +155,6 @@ test_server.cpp:
   - static void read_unionType_union(erpc::Codec * codec, int32_t * discriminator, unionType * data);
   - static void read_unionType_union(erpc::Codec * codec, int32_t * discriminator, unionType * data)
   - "{"
-  - if(NULL == data)
-  - return;
   - codec->startReadUnion(discriminator);
   - switch (*discriminator)
   - "{"
@@ -205,14 +203,6 @@ test_server.cpp:
   - "{"
   - switch (discriminator)
   - "{"
-  - "case banana:"
-  - not: "break;"
-  - "case papaya:"
-  - "case returnVal:"
-  - "default:"
-  - "{"
-  - "break;"
-  - "}"
   - "case apple:"
   - "{"
   - free_foobar_struct(&data->myFoobar);

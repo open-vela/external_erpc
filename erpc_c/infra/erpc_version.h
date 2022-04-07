@@ -20,9 +20,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //! @brief String version of eRPC.
-#define ERPC_VERSION "1.9.0"
+#define ERPC_VERSION "1.8.1"
 //! @brief Integer version of eRPC.
-#define ERPC_VERSION_NUMBER 10900
+#define ERPC_VERSION_NUMBER 10801
 
 /*! @} */
 

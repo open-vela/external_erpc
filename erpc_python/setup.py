@@ -2,23 +2,19 @@
 
 # Copyright (c) 2016 Freescale Semiconductor, Inc.
 # Copyright 2016-2019 NXP
-# Copyright 2022 ACRIOS Systems s.r.o.
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
 from setuptools import setup
+from erpc import erpc_version
 from codecs import open
 from os import path
 
-ERPC_VERSION = None
 here = path.abspath(path.dirname(__file__))
 
 with open(path.join(here, 'README_Pypi.md'), encoding='utf-8') as f:
     long_description = f.read()
-
-with open(path.join(here, 'erpc', 'erpc_version.py')) as f:
-    exec(f.read())
 
 #steps: https://packaging.python.org/distributing/
 #source distribution: python setup.py sdist
@@ -27,14 +23,14 @@ with open(path.join(here, 'erpc', 'erpc_version.py')) as f:
 
 setup(
     name="erpc",
-    version=ERPC_VERSION,
+    version=erpc_version.ERPC_VERSION,
     description="eRPC Python infrastructure",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="NXP",
     url='https://github.com/embeddedrpc/erpc',
     license="BSD 3-Clause",
-    install_requires=[],
+    install_requires=["enum34","pyserial"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",
@@ -47,5 +43,6 @@ setup(
         "Operating System :: POSIX :: Linux",
     ],
     keywords='rpc rpc-framework embedded multicore multiprocessor amp rpmsg_lite',
+    use_2to3=True,
     packages=['erpc'],
 )

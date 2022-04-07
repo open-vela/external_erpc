@@ -27,7 +27,6 @@
 .DS_Store
 *.swp
 *.tmp
-*.log
 
 #
 # Top-level generic files

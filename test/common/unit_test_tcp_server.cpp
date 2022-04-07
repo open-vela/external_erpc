@@ -28,7 +28,7 @@ public:
 
     virtual void dispose(MessageBuffer *buf)
     {
-        erpc_assert(buf);
+        assert(buf);
         if (*buf)
         {
             delete[] buf->get();

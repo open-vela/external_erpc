@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2020 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -8,9 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "erpc_transport_arbitrator.h"
-#include "erpc_config_internal.h"
+
 #include "erpc_manually_constructed.h"
 
+#include <cassert>
 #include <cstdio>
 #include <string>
 
@@ -46,21 +47,21 @@ TransportArbitrator::~TransportArbitrator(void)
 
 void TransportArbitrator::setCrc16(Crc16 *crcImpl)
 {
-    erpc_assert(crcImpl);
-    erpc_assert(m_sharedTransport);
+    assert(crcImpl);
+    assert(m_sharedTransport);
     m_sharedTransport->setCrc16(crcImpl);
 }
 
 bool TransportArbitrator::hasMessage(void)
 {
-    erpc_assert(m_sharedTransport && "shared transport is not set");
+    assert(m_sharedTransport && "shared transport is not set");
 
     return m_sharedTransport->hasMessage();
 }
 
 erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 {
-    erpc_assert(m_sharedTransport && "shared transport is not set");
+    assert(m_sharedTransport && "shared transport is not set");
 
     erpc_status_t err;
     message_type_t msgType;
@@ -141,7 +142,7 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 
 erpc_status_t TransportArbitrator::send(MessageBuffer *message)
 {
-    erpc_assert(m_sharedTransport && "shared transport is not set");
+    assert(m_sharedTransport && "shared transport is not set");
     return m_sharedTransport->send(message);
 }
 
@@ -158,7 +159,7 @@ TransportArbitrator::client_token_t TransportArbitrator::prepareClientReceive(Re
 
 erpc_status_t TransportArbitrator::clientReceive(client_token_t token)
 {
-    erpc_assert((token != 0) && "invalid client token");
+    assert((token != 0) && "invalid client token");
 
     // Convert token to pointer to info struct for this client receive request.
     PendingClientInfo *info = reinterpret_cast<PendingClientInfo *>(token);
@@ -180,7 +181,7 @@ TransportArbitrator::PendingClientInfo *TransportArbitrator::addPendingClient(vo
 
     // Get a free client info node, or allocate one.
     PendingClientInfo *info = NULL;
-    if (m_clientFreeList == NULL)
+    if (!m_clientFreeList)
     {
         info = createPendingClient();
     }
@@ -191,8 +192,15 @@ TransportArbitrator::PendingClientInfo *TransportArbitrator::addPendingClient(vo
     }
 
     // Add to active list.
-    info->m_next = m_clientList;
-    m_clientList = info;
+    if (!m_clientList)
+    {
+        m_clientList = info;
+    }
+    else
+    {
+        info->m_next = m_clientList;
+        m_clientList = info;
+    }
 
     return info;
 }
