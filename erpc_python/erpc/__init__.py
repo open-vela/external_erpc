@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import os
-import typing
 # Yocto and python27 combination
 if "IS_YOCTO" in os.environ:
     from . import erpc_version
@@ -20,13 +19,11 @@ else:
     from . import simple_server
     from . import transport
 
-
+##
+# @brief Simple container class used for pass by reference.
 class Reference(object):
-    """ Simple container class used for pass by reference.
-    """
-
-    def __init__(self, value: typing.Any = None):
-        # Read/write attribute holding the referent.
+    def __init__(self, value=None):
+        ## Read/write attribute holding the referent.
         self.value = value
 
     def __str__(self):
@@ -34,3 +31,4 @@ class Reference(object):
 
     def __repr__(self):
         return self.__str__()
+

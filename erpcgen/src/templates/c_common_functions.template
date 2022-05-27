@@ -377,7 +377,10 @@ else
 
 {# ---------------- freeData ---------------- #}
 {% def freeData(info) %}
-erpc_free({$info.freeName});
+if ({$info.freeName})
+{
+    erpc_free({$info.freeName});
+}
 {% enddef ------------------------------- freeData %}
 
 {# ---------------- freeStruct ---------------- #}
@@ -397,7 +400,10 @@ if ({$info.name})
 {% if info.needFreeingCall == true %}
 {$freeArray(info)}
 {% endif %}
-erpc_free({$info.name});
+if ({$info.name})
+{
+    erpc_free({$info.name});
+}
 {% enddef ------------------------------- freeList %}
 
 {# ---------------- freeArray ---------------- #}
