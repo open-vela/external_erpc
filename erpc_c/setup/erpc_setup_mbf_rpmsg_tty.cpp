@@ -66,7 +66,7 @@ public:
      */
     virtual void dispose(MessageBuffer *buf)
     {
-        erpc_assert(buf != NULL);
+        erpc_assert(buf);
         void *tmp = (void *)buf->get();
         if (tmp != NULL)
         {

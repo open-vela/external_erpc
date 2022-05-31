@@ -35,7 +35,7 @@ public:
 
     virtual void dispose(MessageBuffer *buf)
     {
-        erpc_assert(buf != NULL);
+        erpc_assert(buf);
         if (buf->get() != NULL)
         {
             delete[] buf->get();

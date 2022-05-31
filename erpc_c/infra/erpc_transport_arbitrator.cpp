@@ -46,21 +46,21 @@ TransportArbitrator::~TransportArbitrator(void)
 
 void TransportArbitrator::setCrc16(Crc16 *crcImpl)
 {
-    erpc_assert(crcImpl != NULL);
-    erpc_assert(m_sharedTransport != NULL);
+    erpc_assert(crcImpl);
+    erpc_assert(m_sharedTransport);
     m_sharedTransport->setCrc16(crcImpl);
 }
 
 bool TransportArbitrator::hasMessage(void)
 {
-    erpc_assert((m_sharedTransport != NULL) && ("shared transport is not set" != NULL));
+    erpc_assert(m_sharedTransport && "shared transport is not set");
 
     return m_sharedTransport->hasMessage();
 }
 
 erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 {
-    erpc_assert((m_sharedTransport != NULL) && ("shared transport is not set" != NULL));
+    erpc_assert(m_sharedTransport && "shared transport is not set");
 
     erpc_status_t err;
     message_type_t msgType;
@@ -141,7 +141,7 @@ erpc_status_t TransportArbitrator::receive(MessageBuffer *message)
 
 erpc_status_t TransportArbitrator::send(MessageBuffer *message)
 {
-    erpc_assert((m_sharedTransport != NULL) && ("shared transport is not set" != NULL));
+    erpc_assert(m_sharedTransport && "shared transport is not set");
     return m_sharedTransport->send(message);
 }
 
@@ -158,7 +158,7 @@ TransportArbitrator::client_token_t TransportArbitrator::prepareClientReceive(Re
 
 erpc_status_t TransportArbitrator::clientReceive(client_token_t token)
 {
-    erpc_assert((token != 0) && ("invalid client token" != NULL));
+    erpc_assert((token != 0) && "invalid client token");
 
     // Convert token to pointer to info struct for this client receive request.
     PendingClientInfo *info = reinterpret_cast<PendingClientInfo *>(token);
