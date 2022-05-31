@@ -87,7 +87,7 @@ public:
      */
     virtual void dispose(MessageBuffer *buf)
     {
-        erpc_assert(buf != NULL);
+        erpc_assert(buf);
         uint8_t *tmp = buf->get();
         if (tmp != NULL)
         {

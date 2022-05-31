@@ -11,8 +11,14 @@
 #include "erpc_simple_server.h"
 #include "erpc_transport_setup.h"
 
+#include "board.h"
+#include "myAlloc.h"
+#include "test_unit_test_common_server.h"
+#include "unit_test_wrapped.h"
+
 #if (defined(RPMSG) || defined(UART) || defined(MU))
 extern "C" {
+#include "app_core1.h"
 #if defined(RPMSG)
 #define APP_ERPC_READY_EVENT_DATA (1)
 #include "mcmgr.h"
@@ -23,17 +29,11 @@ extern "C" {
 #define APP_ERPC_READY_EVENT_DATA (1)
 #include "mcmgr.h"
 #endif
-#include "app_core1.h"
 #if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 int main(int argc, const char *argv[]);
 #endif
 }
 #endif
-
-#include "board.h"
-#include "myAlloc.h"
-#include "test_unit_test_common_server.h"
-#include "unit_test_wrapped.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Variables

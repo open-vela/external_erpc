@@ -118,7 +118,7 @@ public:
     }
 
     /*!
-     * @brief Server destructor
+     * @brief ClientManager destructor
      */
     virtual ~Server(void) {}
 

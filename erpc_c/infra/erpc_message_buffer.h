@@ -373,7 +373,7 @@ public:
     MessageBufferFactory(void) {}
 
     /*!
-     * @brief MessageBufferFactory destructor
+     * @brief ClientManager destructor
      */
     virtual ~MessageBufferFactory(void) {}
 
