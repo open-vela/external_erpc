@@ -9,9 +9,6 @@
  */
 
 #include "erpc_framed_transport.h"
-
-#include "erpc_config_internal.h"
-#include ENDIANNESS_HEADER
 #include "erpc_message_buffer.h"
 
 #include <cstdio>
@@ -46,7 +43,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
     erpc_status_t retVal;
     uint16_t computedCrc;
 
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    erpc_assert((m_crcImpl != NULL) && ("Uninitialized Crc16 object." != NULL));
 
     {
 #if !ERPC_THREADS_IS(NONE)
@@ -58,9 +55,6 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
 
         if (retVal == kErpcStatus_Success)
         {
-            ERPC_READ_AGNOSTIC_16(h.m_messageSize);
-            ERPC_READ_AGNOSTIC_16(h.m_crc);
-
             // received size can't be zero.
             if (h.m_messageSize == 0U)
             {
@@ -107,7 +101,7 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
     uint16_t messageLength;
     Header h;
 
-    erpc_assert(m_crcImpl && "Uninitialized Crc16 object.");
+    erpc_assert((m_crcImpl != NULL) && ("Uninitialized Crc16 object." != NULL));
 
 #if !ERPC_THREADS_IS(NONE)
     Mutex::Guard lock(m_sendLock);
@@ -118,10 +112,6 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
     // Send header first.
     h.m_messageSize = messageLength;
     h.m_crc = m_crcImpl->computeCRC16(message->get(), messageLength);
-
-    ERPC_WRITE_AGNOSTIC_16(h.m_messageSize);
-    ERPC_WRITE_AGNOSTIC_16(h.m_crc);
-
     ret = underlyingSend((uint8_t *)&h, sizeof(h));
     if (ret == kErpcStatus_Success)
     {
