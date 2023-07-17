@@ -18,7 +18,7 @@ using namespace erpc;
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED_STATIC(UartTransport, s_uartTransport);
+ERPC_MANUALLY_CONSTRUCTED(UartTransport, s_transport);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -27,48 +27,16 @@ ERPC_MANUALLY_CONSTRUCTED_STATIC(UartTransport, s_uartTransport);
 erpc_transport_t erpc_transport_cmsis_uart_init(void *uartDrv)
 {
     erpc_transport_t transport;
-    UartTransport *uartTransport;
 
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    if (s_uartTransport.isUsed())
+    s_transport.construct(reinterpret_cast<ARM_DRIVER_USART *>(uartDrv));
+    if (s_transport->init() == kErpcStatus_Success)
     {
-        uartTransport = NULL;
+        transport = reinterpret_cast<erpc_transport_t>(s_transport.get());
     }
     else
     {
-        s_uartTransport.construct(reinterpret_cast<ARM_DRIVER_USART *>(uartDrv));
-        uartTransport = s_uartTransport.get();
-    }
-#elif ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
-    uartTransport = new UartTransport(reinterpret_cast<ARM_DRIVER_USART *>(uartDrv));
-#else
-#error "Unknown eRPC allocation policy!"
-#endif
-
-    transport = reinterpret_cast<erpc_transport_t>(uartTransport);
-
-    if (uartTransport != NULL)
-    {
-        if (uartTransport->init() != kErpcStatus_Success)
-        {
-            erpc_transport_cmsis_uart_deinit(transport);
-            transport = NULL;
-        }
+        transport = NULL;
     }
 
     return transport;
-}
-
-void erpc_transport_cmsis_uart_deinit(erpc_transport_t transport)
-{
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    (void)transport;
-    s_uartTransport.destroy();
-#elif ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
-    erpc_assert(transport != NULL);
-
-    UartTransport *uartTransport = reinterpret_cast<UartTransport *>(transport);
-
-    delete uartTransport;
-#endif
 }
