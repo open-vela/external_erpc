@@ -16,7 +16,7 @@ using namespace erpc;
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED_STATIC(I2cSlaveTransport, s_i2cTransport);
+static ManuallyConstructed<I2cSlaveTransport> s_transport;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -24,41 +24,7 @@ ERPC_MANUALLY_CONSTRUCTED_STATIC(I2cSlaveTransport, s_i2cTransport);
 
 erpc_transport_t erpc_transport_i2c_slave_init(void *baseAddr, uint32_t baudRate, uint32_t srcClock_Hz)
 {
-    I2cSlaveTransport *i2cTransport;
-
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    if (s_i2cTransport.isUsed())
-    {
-        i2cTransport = NULL;
-    }
-    else
-    {
-        s_i2cTransport.construct(reinterpret_cast<I2C_Type *>(baseAddr), baudRate, srcClock_Hz);
-        i2cTransport = s_i2cTransport.get();
-    }
-#elif ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
-    i2cTransport = new I2cSlaveTransport(reinterpret_cast<I2C_Type *>(baseAddr), baudRate, srcClock_Hz);
-#else
-#error "Unknown eRPC allocation policy!"
-#endif
-
-    if (i2cTransport != NULL)
-    {
-        (void)i2cTransport->init();
-    }
-
-    return reinterpret_cast<erpc_transport_t>(i2cTransport);
-}
-void erpc_transport_i2c_slave_deinit(erpc_transport_t transport)
-{
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    (void)transport;
-    s_i2cTransport.destroy();
-#elif ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
-    erpc_assert(transport != NULL);
-
-    I2cSlaveTransport *i2cTransport = reinterpret_cast<I2cSlaveTransport *>(transport);
-
-    delete i2cTransport;
-#endif
+    s_transport.construct(reinterpret_cast<I2C_Type *>(baseAddr), baudRate, srcClock_Hz);
+    (void)s_transport->init();
+    return reinterpret_cast<erpc_transport_t>(s_transport.get());
 }

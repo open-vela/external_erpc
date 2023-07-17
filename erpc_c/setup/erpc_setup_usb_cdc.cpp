@@ -17,7 +17,7 @@ using namespace erpc;
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-ERPC_MANUALLY_CONSTRUCTED_STATIC(UsbCdcTransport, s_usbTransport);
+ERPC_MANUALLY_CONSTRUCTED(UsbCdcTransport, s_usb_transport);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -27,52 +27,19 @@ erpc_transport_t erpc_transport_usb_cdc_init(void *serialHandle, void *serialCon
                                              uint8_t *usbRingBuffer, uint32_t usbRingBufferLength)
 {
     erpc_transport_t transport;
-    UsbCdcTransport *usbTransport;
 
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    if (s_usbTransport.isUsed())
+    s_usb_transport.construct(
+        reinterpret_cast<serial_handle_t>(serialHandle), reinterpret_cast<serial_manager_config_t *>(serialConfig),
+        reinterpret_cast<serial_port_usb_cdc_config_t *>(usbCdcConfig), reinterpret_cast<uint8_t *>(usbRingBuffer),
+        reinterpret_cast<uint32_t>(usbRingBufferLength));
+    if (s_usb_transport->init() == kErpcStatus_Success)
     {
-        usbTransport = NULL;
+        transport = reinterpret_cast<erpc_transport_t>(s_usb_transport.get());
     }
     else
     {
-        s_usbTransport.construct(
-            reinterpret_cast<serial_handle_t>(serialHandle), reinterpret_cast<serial_manager_config_t *>(serialConfig),
-            reinterpret_cast<serial_port_usb_cdc_config_t *>(usbCdcConfig), usbRingBuffer, usbRingBufferLength);
-        usbTransport = s_usbTransport.get();
-    }
-#elif ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
-    usbTransport = new UsbCdcTransport(
-        reinterpret_cast<serial_handle_t>(serialHandle), reinterpret_cast<serial_manager_config_t *>(serialConfig),
-        reinterpret_cast<serial_port_usb_cdc_config_t *>(usbCdcConfig), usbRingBuffer, usbRingBufferLength);
-#else
-#error "Unknown eRPC allocation policy!"
-#endif
-
-    transport = reinterpret_cast<erpc_transport_t>(usbTransport);
-
-    if (usbTransport != NULL)
-    {
-        if (usbTransport->init() != kErpcStatus_Success)
-        {
-            erpc_transport_usb_cdc_deinit(transport);
-            transport = NULL;
-        }
+        transport = NULL;
     }
 
     return transport;
-}
-
-void erpc_transport_usb_cdc_deinit(erpc_transport_t transport)
-{
-#if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_STATIC
-    (void)transport;
-    s_usbTransport.destroy();
-#elif ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
-    erpc_assert(transport != NULL);
-
-    UsbCdcTransport *usbTransport = reinterpret_cast<UsbCdcTransport *>(transport);
-
-    delete usbTransport;
-#endif
 }
