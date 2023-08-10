@@ -16,8 +16,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define number 15
-volatile int i = 0;
-volatile int numbers[number];
+int i = 0;
+int numbers[number];
 FirstInterface_service *svc;
 
 void firstSendInt(int32_t a)
