@@ -18,8 +18,8 @@
 
 #define number 15
 #define nestedCallsCount 10
-volatile int j = 0;
-volatile int numbers[number];
+int j = 0;
+int numbers[number];
 volatile bool enabled = false;
 SecondInterface_service *svc;
 
