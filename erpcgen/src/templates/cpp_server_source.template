@@ -106,7 +106,7 @@ extern bool nestingDetection;
 {%  for callbackFunction in fn.functions %}
 {$serverIndent}    {% if loop.first == false %}else {% endif %}if (({$serverIDName} == {$callbackFunction.serviceId}) && ({$functionIDName} == {$callbackFunction.id}))
 {$serverIndent}    {
-{$serverIndent}        m_handler->{$callbackFunction.serverPrototype}
+{$serverIndent}        result = m_handler->{$callbackFunction.serverPrototype}
 {$serverIndent}    }
 {%  endfor -- callbackFunction in callbackType.functions %}
 {% else -- serverIDName == "serviceID" %}
@@ -181,14 +181,14 @@ extern bool nestingDetection;
 {% for iface in group.interfaces %}
 {%  for cb in iface.callbacksInt  if (count(cb.callbacks) > 1) %}
 // Common function for serializing and deserializing callback functions of same type.
-static erpc_status_t {$iface.interfaceClassName}_{$cb.name}_shim({$iface.interfaceClassName} *m_handler, uint32_t serviceID, uint32_t functionID, {$codecClass} * codec, MessageBufferFactory *messageFactory, Transport * transport, uint32_t sequence);
+static erpc_status_t {$iface.interfaceClassName}_{$cb.serverName}_shim({$iface.interfaceClassName} *m_handler, uint32_t serviceID, uint32_t functionID, {$codecClass} * codec, MessageBufferFactory *messageFactory, Transport * transport, uint32_t sequence);
 {%  endfor %}
 {% endfor %}
 {% for iface in group.interfaces %}
 {%  for cb in iface.callbacksInt if (count(cb.callbacks) > 1) %}
 
 // Common function for serializing and deserializing callback functions of same type.
-static erpc_status_t {$iface.interfaceClassName}_{$cb.name}_shim({$iface.interfaceClassName} *m_handler, uint32_t serviceID, uint32_t functionID, {$codecClass} * codec, MessageBufferFactory *messageFactory, Transport * transport, uint32_t sequence)
+static erpc_status_t {$iface.interfaceClassName}_{$cb.serverName}_shim({$iface.interfaceClassName} *m_handler, uint32_t serviceID, uint32_t functionID, {$codecClass} * codec, MessageBufferFactory *messageFactory, Transport * transport, uint32_t sequence)
 {
 {$ serverShimCode(iface, "m_handler", cb.callbacksData, "serviceID", "functionID") >}
 }

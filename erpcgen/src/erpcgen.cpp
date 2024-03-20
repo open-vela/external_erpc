@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <vector>
+#include <string.h>
+#include <linux/limits.h>
 
 /*!
  * @brief Entry point for the tool.
@@ -53,6 +55,7 @@ static const char *k_optionsDefinition[] = { "?|help",
                                              "g:generate <language>",
                                              "c:codec <codecType>",
                                              "p:package <packageName>",
+                                             "a|add prefix",
                                              NULL };
 
 /*! Help string. */
@@ -66,6 +69,7 @@ const char k_usageText[] =
   -g/--generate <language>     Select the output language (default is C)\n\
   -c/--codec <codecType>       Specify used codec type\n\
   -p/--package <packageName>   Java app package (com.example.app) (only for Java)\n\
+  -a/--addprefix               Add client or server prefix for function name\n\
 \n\
 Available languages (use with -g option):\n\
   c    C/C++\n\
@@ -117,6 +121,7 @@ protected:
     languages_t m_outputLanguage;         /*!< Output language we're generating. */
     InterfaceDefinition::codec_t m_codec; /*!< Used codec type. */
     string m_javaPackageName;             /*!< Used java package. */
+    bool m_addPrefix;                     /*!< Flag hints for adding prefix for c/s func name. */
 
 public:
     /*!
@@ -129,7 +134,7 @@ public:
      */
     erpcgenTool(int argc, char *argv[]) :
     m_argc(argc), m_argv(argv), m_logger(0), m_verboseType(verbose_type_t::kWarning), m_outputFilePath(NULL),
-    m_ErpcFile(NULL), m_outputLanguage(languages_t::kCLanguage), m_codec(InterfaceDefinition::codec_t::kNotSpecified)
+    m_ErpcFile(NULL), m_outputLanguage(languages_t::kCLanguage), m_codec(InterfaceDefinition::codec_t::kNotSpecified), m_addPrefix(false)
     {
         // create logger instance
         m_logger = new StdoutLogger();
@@ -247,6 +252,12 @@ public:
                     break;
                 }
 
+                case 'a':
+                {
+                    m_addPrefix = true;
+                    break;
+                }
+
                 default:
                 {
                     Log::error("error: unrecognized option\n\n");
@@ -333,6 +344,7 @@ public:
 
             std::filesystem::path filePath(m_ErpcFile);
             def.setProgramInfo(filePath.filename().generic_string(), m_outputFilePath, m_codec);
+            def.setAddPrefixFlag(m_addPrefix);
 
             switch (m_outputLanguage)
             {

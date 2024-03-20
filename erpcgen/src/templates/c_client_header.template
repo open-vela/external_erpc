@@ -26,9 +26,6 @@ extern "C"
 {
 #endif
 
-#if !defined({$getFunctionDeclarationMacroName()})
-#define {$getFunctionDeclarationMacroName()}
-
 {% for iface in group.interfaces %}
 {%  for cb in iface.callbacksInt%}
 typedef {$cb.typenameName};
@@ -50,12 +47,11 @@ enum _{$iface.name}_ids
 //@{
 {%  for fn in iface.functions if fn.isNonExternalFunction == true %}
 {$> fn.mlComment}
-{$fn.prototype};{$fn.ilComment}{$loop.addNewLineIfNotLast}
+{$fn.prototypeClient};{$fn.ilComment}{$loop.addNewLineIfNotLast}
 {%  endfor -- functions %}
 //@}{$iface.ilComment}
 
 {% endfor -- iface %}
-#endif // {$getFunctionDeclarationMacroName()}
 
 {% for iface in group.interfaces %}
 void init{$iface.clientClassName}(erpc_client_t client);

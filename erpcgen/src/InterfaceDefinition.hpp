@@ -159,6 +159,19 @@ public:
      */
     uint16_t getIdlCrc16() { return m_idlCrc16; }
 
+    /*!
+     * @brief This function sets add prefix flag.
+     *
+     * @param[in] addPrefix, boolean flag hints for whether adding prefix for c/s func name.
+     */
+    void setAddPrefixFlag(bool addPrefix);
+
+    /*!
+     * @brief This function returns flag for whether adding prefix for c/s func name.
+     *
+     * @return bool flag which hints for whether adding prefix for c/s func name.
+     */
+    bool getAddPrefixFlag();
 private:
     /* Instance Variables */
     AstNode *m_ast;                          /*!< Root of AstNode tree. */
@@ -169,6 +182,7 @@ private:
     std::filesystem::path m_outputDirectory; /*!< Output file path. */
     codec_t m_codec;                         /*!< Used codec type. */
     uint16_t m_idlCrc16;                     /*!< Crc16 of IDL files. */
+    bool m_addPrefix;                        /*!< Hints for adding prefix for c/s func name. */
 
     /* Private Functions */
     /*!

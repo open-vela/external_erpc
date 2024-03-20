@@ -24,7 +24,7 @@ using namespace std;
 {%  if count(iface.callbacksAll) > 0 %}
 
 {%   for cb in iface.callbacksAll %}
-static const {$cb.name} _{$cb.name}[{$count(cb.callbacks)}] = { {%    for c in cb.callbacks %}{$c.name}{%     if !loop.last %}, {%     endif -- loop.last %}{%    endfor -- f.callbacks %} };
+static const {$cb.name} _{$cb.name}[{$count(cb.callbacks)}] = { {%    for c in cb.callbacks %}{$c.serverName}{%     if !loop.last %}, {%     endif -- loop.last %}{%    endfor -- f.callbacks %} };
 {%   endfor %}
 {%  endif %}
 {% endfor %}
@@ -58,7 +58,7 @@ class {$iface.serverClassName}: public {$iface.interfaceClassName}
 {%    endfor %}
 
 {%   endif%}
-            {% if fn.returnValue.type.isNotVoid %}result = {% endif %}::{$fn.name}({% for param in fn.parameters %}{% if !loop.first %}, {% endif %}{$param.pureNameC}{% endfor %});
+            {% if fn.returnValue.type.isNotVoid %}result = {% endif %}::{$fn.serverName}({% for param in fn.parameters %}{% if !loop.first %}, {% endif %}{$param.pureNameC}{% endfor %});
 {%   for cb in fn.callbackParameters if cb.out %}
 
             if (findIndexOfFunction((arrayOfFunctionPtr_t)::_{$cb.type}, sizeof(::_{$cb.type})/sizeof(::{$cb.type}), (functionPtr_t)_{$cb.name}, _fnIndex))

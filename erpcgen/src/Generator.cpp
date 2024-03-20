@@ -648,13 +648,10 @@ data_list Generator::getFunctionsTemplateData(Group *group, Interface *iface)
 {
     data_list fns;
 
-    int j = 0;
     for (auto fit : iface->getFunctions())
     {
         data_map function = getFunctionTemplateData(group, fit);
         fns.push_back(function);
-
-        Log::info("    %d: (%d) %s\n", j, fit->getUniqueId(), function["prototype"]->getvalue().c_str());
     }
     return fns;
 }
@@ -725,6 +722,10 @@ void Generator::getCallbacksTemplateData(Group *group, const Interface *iface, d
             {
                 data_map function;
                 function["name"] = fun->getName();
+                function["serverName"] = m_def->getAddPrefixFlag() ?
+                                         ("server_" + fun->getName()) : fun->getName();
+                function["clientName"] = m_def->getAddPrefixFlag() ?
+                                         ("client_" + fun->getName()) : fun->getName();
                 if (fun->getInterface() == iface)
                 {
                     functionsInt.push_back(function);
@@ -740,6 +741,10 @@ void Generator::getCallbacksTemplateData(Group *group, const Interface *iface, d
         {
             data_map callbackType;
             callbackType["name"] = functionType->getName();
+            callbackType["serverName"] = m_def->getAddPrefixFlag() ?
+                                     ("server_" + functionType->getName()) : functionType->getName();
+            callbackType["clientName"] = m_def->getAddPrefixFlag() ?
+                                     ("client_" + functionType->getName()) : functionType->getName();
             callbackType["typenameName"] = getFunctionPrototype(nullptr, functionType);
             callbackType["interfaceTypenameName"] =
                 getFunctionPrototype(nullptr, functionType, iface->getName() + "_interface");

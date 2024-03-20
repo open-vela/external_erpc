@@ -1684,13 +1684,17 @@ data_map CGenerator::getFunctionTemplateData(Group *group, Function *fn)
     if (useCommonFunction)
     {
         std::string callbackFName = getOutputName(fn->getFunctionType());
-        info["callbackFNameNoGroup"] = callbackFName;
+        info["callbackFNameNoGroup"] = m_def->getAddPrefixFlag() ?
+                                       ("server_" + callbackFName) : callbackFName;
         if (!group->getName().empty())
         {
             callbackFName += "_" + group->getName();
         }
         info["isCallback"] = true;
-        info["callbackFName"] = callbackFName;
+        info["serverCallbackFName"] = m_def->getAddPrefixFlag() ?
+                                      ("server_" + callbackFName) : callbackFName;
+        info["clientCallbackFName"] = m_def->getAddPrefixFlag() ?
+                                      ("client_" + callbackFName) : callbackFName;
         info["serviceId"] = fn->getInterface()->getUniqueId();
     }
     else
@@ -1703,7 +1707,12 @@ data_map CGenerator::getFunctionTemplateData(Group *group, Function *fn)
     info["serverPrototypeC"] = serverProtoC;
 
     string proto = getFunctionPrototype(group, fn);
-    info["prototype"] = proto;
+    info["prototypeClient"] = m_def->getAddPrefixFlag() ?
+                              getFunctionPrototypeWithPrefix(group, fn, "", "", false, "client_") :
+                              getFunctionPrototype(group, fn);
+    info["prototypeServer"] = m_def->getAddPrefixFlag() ?
+                              getFunctionPrototypeWithPrefix(group, fn, "", "", false, "server_") :
+                              getFunctionPrototype(group, fn);
     string protoCpp = getFunctionPrototype(group, fn, getOutputName(fn->getInterface()) + "_client", "", true);
     info["prototypeCpp"] = protoCpp;
     string protoInterface = getFunctionPrototype(group, fn, "", "", true);
@@ -1727,6 +1736,8 @@ data_map CGenerator::getFunctionTemplateData(Group *group, Function *fn)
     info["callbackParameters"] = callbackParameters;
 
     info["name"] = getOutputName(fn);
+    info["serverName"] = m_def->getAddPrefixFlag() ?
+                         ("server_" + getOutputName(fn)) : getOutputName(fn);
     info["id"] = fn->getUniqueId();
 
     return info;
@@ -1754,7 +1765,10 @@ data_map CGenerator::getFunctionTypeTemplateData(Group *group, FunctionType *fn)
 
     string proto = getFunctionPrototype(group, fn, "", name);
     info = getFunctionBaseTemplateData(group, fn);
-    info["prototype"] = proto;
+    info["serverPrototype"] = m_def->getAddPrefixFlag() ?
+                      getFunctionPrototypeWithPrefix(group, fn, "", name, false, "server_") : proto;
+    info["clientPrototype"] = m_def->getAddPrefixFlag() ?
+                      getFunctionPrototypeWithPrefix(group, fn, "", name, false, "client_") : proto;
     info["name"] = name;
 
     data_list functionInfos;
@@ -2011,8 +2025,9 @@ string CGenerator::getFunctionServerCall(Function *fn, bool isCCall)
     return proto + ");";
 }
 
-string CGenerator::getFunctionPrototype(Group *group, FunctionBase *fn, const std::string &interfaceName,
-                                        const string &name, bool insideInterfaceCall)
+string CGenerator::getFunctionPrototypeWithPrefix(Group *group, FunctionBase *fn,
+                                        const std::string &interfaceName, const string &name,
+                                        bool insideInterfaceCall, const string &prefix)
 {
     DataType *dataTypeReturn = fn->getReturnType();
     string proto = getExtraPointerInReturn(dataTypeReturn);
@@ -2033,6 +2048,10 @@ string CGenerator::getFunctionPrototype(Group *group, FunctionBase *fn, const st
         Symbol *symbol = dynamic_cast<Symbol *>(fn);
         assert(symbol);
         string functionName = getOutputName(symbol);
+        if (!prefix.empty())
+        {
+            functionName = prefix + functionName;
+        }
         if (funType) /* Need add '(*name)' for function type definition. */
         {
             proto += "(" + ifaceVar + "*" + functionName + ")";
@@ -2044,7 +2063,7 @@ string CGenerator::getFunctionPrototype(Group *group, FunctionBase *fn, const st
     }
     else
     {
-        proto += ifaceVar + name;
+        proto += ifaceVar + (!prefix.empty() ? prefix : "") + name;
     }
 
     proto += "(";
@@ -2177,6 +2196,13 @@ string CGenerator::getFunctionPrototype(Group *group, FunctionBase *fn, const st
         proto = "(" + proto + ")";
     }
     return getTypenameName(dataTypeReturn, proto); //! return type
+}
+
+
+string CGenerator::getFunctionPrototype(Group *group, FunctionBase *fn, const std::string &interfaceName,
+                                        const string &name, bool insideInterfaceCall)
+{
+    return getFunctionPrototypeWithPrefix(group, fn, interfaceName, name, insideInterfaceCall, "");
 }
 
 string CGenerator::generateIncludeGuardName(const string &filename)

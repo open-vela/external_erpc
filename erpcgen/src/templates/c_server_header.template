@@ -27,9 +27,6 @@ extern "C"
 
 typedef void * erpc_service_t;
 
-#if !defined({$getFunctionDeclarationMacroName()})
-#define {$getFunctionDeclarationMacroName()}
-
 {% for iface in group.interfaces %}
 {%  for cb in iface.callbacksInt%}
 typedef {$cb.typenameName};
@@ -51,13 +48,11 @@ enum _{$iface.name}_ids
 //@{
 {%  for fn in iface.functions if fn.isNonExternalFunction == true %}
 {$> fn.mlComment}
-{$fn.prototype};{$fn.ilComment}{$loop.addNewLineIfNotLast}
+{$fn.prototypeServer};{$fn.ilComment}{$loop.addNewLineIfNotLast}
 {%  endfor -- functions %}
 //@}{$iface.ilComment}
 
 {% endfor -- iface %}
-
-#endif // {$getFunctionDeclarationMacroName()}
 
 {% for iface in group.interfaces %}
 /*! @brief Return {$iface.serviceClassName} service object. */

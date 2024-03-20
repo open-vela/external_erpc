@@ -23,7 +23,7 @@ using namespace std;
 {%  if count(iface.callbacksAll) > 0 %}
 
 {%   for cb in iface.callbacksAll %}
-static const {$cb.name} _{$cb.name}[{$count(cb.callbacks)}] = { {%    for c in cb.callbacks %}{$c.name}{%     if !loop.last %}, {%     endif -- loop.last %}{%    endfor -- f.callbacks %} };
+static const {$cb.name} _{$cb.name}[{$count(cb.callbacks)}] = { {%    for c in cb.callbacks %}{$c.clientName}{%     if !loop.last %}, {%     endif -- loop.last %}{%    endfor -- f.callbacks %} };
 {%   endfor %}
 {%  endif %}
 {% endfor %}
@@ -38,7 +38,7 @@ ERPC_MANUALLY_CONSTRUCTED_STATIC({$iface.clientClassName}, s_{$iface.clientClass
 {% for iface in group.interfaces %}
 {%  for fn in iface.functions %}
 
-{$fn.prototype}
+{$fn.prototypeClient}
 {
 {% if count(fn.callbackParameters) > 0 %}
     uint16_t _fnIndex;

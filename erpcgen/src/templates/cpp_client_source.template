@@ -5,12 +5,12 @@
 {% endif %}
 {$commonHeader()}
 
+#include "erpc_manually_constructed.hpp"
 #if ERPC_ALLOCATION_POLICY == ERPC_ALLOCATION_POLICY_DYNAMIC
 #include "erpc_port.h"
 #endif
 #include "{$codecHeader}"
 #include "{$clientCppHeaderName}"
-#include "erpc_manually_constructed.hpp"
 
 {$checkVersion()}
 {$>checkCrc()}
@@ -51,7 +51,7 @@ using namespace std;
     pre_post_action_cb preCB = {$client}->getPreCB();
     if (preCB)
     {
-        preCB();
+        preCB({$client}->getContext());
     }
 #endif
 
@@ -144,7 +144,7 @@ using namespace std;
     pre_post_action_cb postCB = {$client}->getPostCB();
     if (postCB)
     {
-        postCB();
+        postCB({$client}->getContext());
     }
 #endif
 
@@ -164,12 +164,12 @@ using namespace std;
 {%  for cb in iface.callbacksInt if (count(cb.callbacks) > 1) %}
 
 // Common function for serializing and deserializing callback functions of same type.
-static {$cb.callbacksData.prototype};
+static {$cb.callbacksData.clientPrototype};
 {% endfor %}
 {%  for cb in iface.callbacksInt if (count(cb.callbacks) > 1) %}
 
 // Common function for serializing and deserializing callback functions of same type.
-static {$cb.callbacksData.prototype}
+static {$cb.callbacksData.clientPrototype}
 {
 {$ clientShimCode("m_clientManager", cb.callbacksData, "serviceID", "functionID") >}
 }
@@ -189,7 +189,7 @@ static {$cb.callbacksData.prototype}
 {$fn.prototypeCpp}
 {
 {%  if fn.isCallback %}
-    {% if fn.returnValue.type.isNotVoid %}return {% endif %}{$fn.callbackFName}(m_clientManager, m_serviceId, {$getClassFunctionIdName(fn)}{% for param in fn.parameters %}, {$param.pureName}{% endfor %});
+    {% if fn.returnValue.type.isNotVoid %}return {% endif %}{$fn.clientCallbackFName}(m_clientManager, m_serviceId, {$getClassFunctionIdName(fn)}{% for param in fn.parameters %}, {$param.pureName}{% endfor %});
 {%  else -- fn.isCallback >%}
 {$ clientShimCode("m_clientManager", fn, "m_serviceId", getClassFunctionIdName(fn)) >}
 {%  endif -- fn.isCallback >%}

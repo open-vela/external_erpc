@@ -29,7 +29,7 @@ using namespace std;
 
 InterfaceDefinition::InterfaceDefinition() :
 m_ast(nullptr), m_globals(), m_program(nullptr), m_programName(""), m_outputFilename(""),
-m_codec(codec_t::kNotSpecified), m_idlCrc16(0)
+m_codec(codec_t::kNotSpecified), m_idlCrc16(0), m_addPrefix(false)
 {
     init();
 }
@@ -118,4 +118,14 @@ void InterfaceDefinition::setOutputFilename(const string &filename)
     {
         m_outputFilename = filename;
     }
+}
+
+void InterfaceDefinition::setAddPrefixFlag(bool addPrefix)
+{
+    m_addPrefix = addPrefix;
+}
+
+bool InterfaceDefinition::getAddPrefixFlag()
+{
+    return m_addPrefix;
 }

@@ -472,10 +472,28 @@ private:
      * @param[in] interfaceName Interface name used for function declaration.
      * @param[in] name Name used for shared code in case of function type.
      * @param[in] insideInterfaceCall interfaceClass specific.
+     * @param[in] prefix add before function name.
      *
      * @return String prototype representation for given function.
      */
-    std::string getFunctionPrototype(Group *group, FunctionBase *fn, const std::string &interfaceName = "",
+    std::string getFunctionPrototypeWithPrefix(Group *group, FunctionBase *fn,
+                                     const std::string &interfaceName = "",
+                                     const std::string &name = "", bool insideInterfaceCall = false,
+                                     const std::string &prefix = "");
+
+    /*!
+     * @brief This function return interface function prototype.
+     *
+     * @param[in] group Group to which function belongs.
+     * @param[in] fn Function for prototyping.
+     * @param[in] interfaceName Interface name used for function declaration.
+     * @param[in] name Name used for shared code in case of function type.
+     * @param[in] insideInterfaceCall interfaceClass specific.
+     *
+     * @return String prototype representation for given function.
+     */
+    std::string getFunctionPrototype(Group *group, FunctionBase *fn,
+                                     const std::string &interfaceName = "",
                                      const std::string &name = "", bool insideInterfaceCall = false) override;
 
     /*!
