@@ -9,12 +9,7 @@
 #ifndef _EMBEDDED_RPC__TCP_TRANSPORT_H_
 #define _EMBEDDED_RPC__TCP_TRANSPORT_H_
 
-#if defined(__MINGW32__)
-#include <winsock2.h>
-#endif
-
-#include "erpc_framed_transport.hpp"
-#include "erpc_threading.h"
+#include "erpc_sock_transport.hpp"
 
 /*!
  * @addtogroup tcp_transport
@@ -32,7 +27,7 @@ namespace erpc {
  *
  * @ingroup tcp_transport
  */
-class TCPTransport : public FramedTransport
+class TCPTransport : public SockTransport
 {
 public:
     /*!
@@ -68,37 +63,9 @@ public:
      */
     void configure(const char *host, uint16_t port);
 
-    /*!
-     * @brief This function will create host on server side, or connect client to the server.
-     *
-     * @retval #kErpcStatus_Success When creating host was successful or client connected successfully.
-     * @retval #kErpcStatus_UnknownName Host name resolution failed.
-     * @retval #kErpcStatus_ConnectionFailure Connecting to the specified host failed.
-     */
-    virtual erpc_status_t open(void);
-
-    /*!
-     * @brief This function disconnects client or stop server host.
-     *
-     * @param[in] stopServer Specify is server shall be closed as well (stop listen())
-     * @retval #kErpcStatus_Success Always return this.
-     */
-    virtual erpc_status_t close(bool stopServer = true);
-
 protected:
-    bool m_isServer;    /*!< If true then server is using transport, else client. */
     const char *m_host; /*!< Specify the host name or IP address of the computer. */
     uint16_t m_port;    /*!< Specify the listening port number. */
-#if defined(__MINGW32__)
-    SOCKET m_socket; /*!< Socket number. */
-#else
-    int m_socket; /*!< Socket number. */
-#endif
-    Thread m_serverThread; /*!< Pointer to server thread. */
-    bool m_runServer;      /*!< Thread is executed while this is true. */
-
-    using FramedTransport::underlyingReceive;
-    using FramedTransport::underlyingSend;
 
     /*!
      * @brief This function connect client to the server.
@@ -109,44 +76,9 @@ protected:
     virtual erpc_status_t connectClient(void);
 
     /*!
-     * @brief This function read data.
-     *
-     * @param[inout] data Preallocated buffer for receiving data.
-     * @param[in] size Size of data to read.
-     *
-     * @retval #kErpcStatus_Success When data was read successfully.
-     * @retval #kErpcStatus_ReceiveFailed When reading data ends with error.
-     * @retval #kErpcStatus_ConnectionClosed Peer closed the connection.
-     */
-    virtual erpc_status_t underlyingReceive(uint8_t *data, uint32_t size) override;
-
-    /*!
-     * @brief This function writes data.
-     *
-     * @param[in] data Buffer to send.
-     * @param[in] size Size of data to send.
-     *
-     * @retval #kErpcStatus_Success When data was written successfully.
-     * @retval #kErpcStatus_SendFailed When writing data ends with error.
-     * @retval #kErpcStatus_ConnectionClosed Peer closed the connection.
-     */
-    virtual erpc_status_t underlyingSend(const uint8_t *data, uint32_t size) override;
-
-    /*!
      * @brief Server thread function.
      */
-    void serverThread(void);
-
-    /*!
-     * @brief Thread entry point.
-     *
-     * Control is passed to the serverThread() method of the TCPTransport instance pointed to
-     * by the @c arg parameter.
-     *
-     * @param arg Thread argument. The pointer to the TCPTransport instance is passed through
-     *  this argument.
-     */
-    static void serverThreadStub(void *arg);
+    virtual void serverThread(void);
 };
 
 } // namespace erpc

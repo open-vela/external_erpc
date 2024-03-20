@@ -60,39 +60,13 @@ using namespace erpc;
 ////////////////////////////////////////////////////////////////////////////////
 
 TCPTransport::TCPTransport(bool isServer) :
-m_isServer(isServer), m_host(NULL), m_port(0)
-#if defined(__MINGW32__)
-,
-m_socket(INVALID_SOCKET)
-#else
-,
-m_socket(-1)
-#endif
-,
-m_serverThread(serverThreadStub), m_runServer(true)
+SockTransport(isServer), m_host(NULL), m_port(0)
 {
-#if defined(__MINGW32__)
-    WSADATA ws;
-    WSAStartup(MAKEWORD(2, 2), &ws);
-#endif
 }
 
 TCPTransport::TCPTransport(const char *host, uint16_t port, bool isServer) :
-m_isServer(isServer), m_host(host), m_port(port)
-#if defined(__MINGW32__)
-,
-m_socket(INVALID_SOCKET)
-#else
-,
-m_socket(-1)
-#endif
-,
-m_serverThread(serverThreadStub), m_runServer(true)
+SockTransport(isServer), m_host(host), m_port(port)
 {
-#if defined(__MINGW32__)
-    WSADATA ws;
-    WSAStartup(MAKEWORD(2, 2), &ws);
-#endif
 }
 
 TCPTransport::~TCPTransport(void) {}
@@ -101,24 +75,6 @@ void TCPTransport::configure(const char *host, uint16_t port)
 {
     m_host = host;
     m_port = port;
-}
-
-erpc_status_t TCPTransport::open(void)
-{
-    erpc_status_t status;
-
-    if (m_isServer)
-    {
-        m_runServer = true;
-        m_serverThread.start(this);
-        status = kErpcStatus_Success;
-    }
-    else
-    {
-        status = connectClient();
-    }
-
-    return status;
 }
 
 erpc_status_t TCPTransport::connectClient(void)
@@ -279,129 +235,6 @@ erpc_status_t TCPTransport::connectClient(void)
     return status;
 }
 
-erpc_status_t TCPTransport::close(bool stopServer)
-{
-    if (m_isServer && stopServer)
-    {
-        m_runServer = false;
-    }
-
-#if defined(__MINGW32__)
-    if (m_socket != INVALID_SOCKET)
-    {
-        closesocket(m_socket);
-        m_socket = INVALID_SOCKET;
-    }
-#else
-    if (m_socket != -1)
-    {
-        ::close(m_socket);
-        m_socket = -1;
-    }
-#endif
-
-    return kErpcStatus_Success;
-}
-
-erpc_status_t TCPTransport::underlyingReceive(uint8_t *data, uint32_t size)
-{
-    ssize_t length;
-    erpc_status_t status = kErpcStatus_Success;
-
-    // Block until we have a valid connection.
-#if defined(__MINGW32__)
-    while (m_socket == INVALID_SOCKET)
-#else
-    while (m_socket <= 0)
-#endif
-    {
-        // Sleep 10 ms.
-        Thread::sleep(10000);
-    }
-
-    // Loop until all requested data is received.
-    while (size > 0U)
-    {
-#if defined(__MINGW32__)
-        length = recv(m_socket, (char *)data, size, 0);
-#else
-        length = read(m_socket, data, size);
-#endif
-
-        // Length will be zero if the connection is closed.
-        if (length > 0)
-        {
-            size -= length;
-            data += length;
-        }
-        else
-        {
-            if (length == 0)
-            {
-                // close socket, not server
-                close(false);
-                status = kErpcStatus_ConnectionClosed;
-            }
-            else
-            {
-                status = kErpcStatus_ReceiveFailed;
-            }
-            break;
-        }
-    }
-
-    return status;
-}
-
-erpc_status_t TCPTransport::underlyingSend(const uint8_t *data, uint32_t size)
-{
-    erpc_status_t status = kErpcStatus_Success;
-    ssize_t result;
-
-#if defined(__MINGW32__)
-    if (m_socket == INVALID_SOCKET)
-#else
-    if (m_socket <= 0)
-#endif
-    {
-        // we should not pretend to have a succesful Send or we create a deadlock
-        status = kErpcStatus_ConnectionFailure;
-    }
-    else
-    {
-        // Loop until all data is sent.
-        while (size > 0U)
-        {
-#if defined(__MINGW32__)
-            result = ::send(m_socket, (const char *)data, size, 0);
-#else
-            result = write(m_socket, data, size);
-#endif
-            if (result >= 0)
-            {
-                size -= result;
-                data += result;
-            }
-            else
-            {
-                if (result == EPIPE)
-                {
-                    // close socket, not server
-                    close(false);
-                    status = kErpcStatus_ConnectionClosed;
-                }
-                else
-                {
-                    status = kErpcStatus_SendFailed;
-                }
-                break;
-            }
-        }
-    }
-
-    return status;
-}
-
 void TCPTransport::serverThread(void)
 {
     int yes = 1;
@@ -510,13 +343,3 @@ void TCPTransport::serverThread(void)
     }
 }
 
-void TCPTransport::serverThreadStub(void *arg)
-{
-    TCPTransport *This = reinterpret_cast<TCPTransport *>(arg);
-
-    TCP_DEBUG_PRINT("in serverThreadStub (arg=%p)\n", arg);
-    if (This != NULL)
-    {
-        This->serverThread();
-    }
-}

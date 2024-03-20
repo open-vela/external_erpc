@@ -470,7 +470,7 @@ erpc_transport_t erpc_transport_tcp_init(const char *host, uint16_t port, bool i
  * uses and accept() which is a not-recommended blocking method so we can't exit
  * until a connection attempts is made. This is a deadlock but assuming that TCP
  * code is supposed to be for test, I assume it's acceptable. Otherwise a non-blocking
- * socket or select() shoudl be used
+ * socket or select() should be used
  * For client, close server connection
  *
  * @param[in] transport Transport which was returned from init function.
@@ -553,6 +553,48 @@ erpc_transport_t erpc_transport_usb_cdc_init(void *serialHandle, void *serialCon
 void erpc_transport_usb_cdc_deinit(erpc_transport_t transport);
 
 //@}
+
+//! @name RpmsgSock transport setup
+//@{
+
+/*!
+ * @brief Create and open RpmsgSock transport
+ *
+ * For server, create a RpmsgSock listen socket and wait for connections
+ * For client, connect to server
+ *
+ * @param[in] rp_name remote rpmsg socket name
+ * @param[in] rp_cpu remote cpu name
+ * @param[in] isServer true if we are a server
+ *
+ * @return Return NULL or erpc_transport_t instance pointer.
+ */
+erpc_transport_t erpc_transport_rpmsg_sock_init(const char *rp_name,
+                                                const char *rp_cpu, bool isServer);
+
+/*!
+ * @brief Close RpmsgSock connection
+ *
+ * For server, stop listening and close all sockets. Note that the server mode
+ * uses and accept() which is a not-recommended blocking method so we can't exit
+ * until a connection attempts is made. This is a deadlock but assuming that RpmsgSock
+ * code is supposed to be for test, I assume it's acceptable. Otherwise a non-blocking
+ * socket or select() should be used
+ * For client, close server connection
+ *
+ * @param[in] transport Transport which was returned from init function.
+ */
+void erpc_transport_rpmsg_sock_close(erpc_transport_t transport);
+
+/*!
+ * @brief Deinitialize RpmsgSock transport.
+ *
+ * @param[in] transport Transport which was initialized with init function.
+ */
+void erpc_transport_rpmsg_sock_deinit(erpc_transport_t transport);
+
+//@}
+
 
 //@}
 
