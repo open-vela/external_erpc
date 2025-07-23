@@ -1,44 +1,20 @@
-# Pull request
+*Note: Please adhere to [Contributing Guidelines](https://github.com/open-vela/docs/blob/dev/CONTRIBUTING.md).*
 
-## Choose Correct
+## Summary
 
-- [ ] bug
-- [ ] feature
+*Update this section with information on why change is necessary,
+ what it exactly does and how, if new feature shows up, provide
+ references (dependencies, similar problems and solutions), etc.*
 
-## Describe the pull request
-<!--
-A clear and concise description of what the pull request is.
--->
+## Impact
 
-## To Reproduce
-<!--
-Steps to reproduce the behavior.
--->
+*Update this section, where applicable, on how change affects users,
+ build process, hardware, documentation, security, compatibility, etc.*
 
-## Expected behavior
-<!--
-A clear and concise description of what you expected to happen.
--->
+## Testing
 
-## Screenshots
-<!--
-If applicable, add screenshots to help explain your problem.
--->
+*Update this section with details on how did you verify the change,
+ what Host was used for build (OS, CPU, compiler, ..), what Target was
+ used for verification (arch, board:config, ..), etc. Providing build
+ and runtime logs from before and after change is highly appreciated.*
 
-## Desktop (please complete the following information):
-
-- OS<!--[e.g. iOS]-->:
-- eRPC Version<!--[e.g. v1.9.0]-->:
-
-## Steps you didn't forgot to do
-
-- [ ] I checked if other PR isn't solving this issue.
-- [ ] I read Contribution details and did appropriate actions.
-- [ ] PR code is tested.
-- [ ] PR code is formatted.
-- [ ] Allow edits from maintainers pull request option is set (recommended).
-
-## Additional context
-<!--
-Add any other context about the problem here.
--->
